@@ -1,0 +1,152 @@
+Parameter: Sex
+
+Possible values:
+Male
+Female
+
+--
+Parameter: Division
+
+Possible values:
+All
+Collegiate
+High School
+Junior
+High School JV
+Master
+Master 1
+Master 2
+Master 3
+Master 4
+Master 5
+Master 6
+Open
+Raw Collegiate
+Raw High School
+Raw Junior
+Raw High School JV
+Raw Master
+Raw Master 1
+Raw Master 2
+Raw Master 3
+Raw Master 4
+Raw Master 5
+Raw Master 6
+Raw Master 7
+Raw Military Open
+Raw Open
+Raw Special Olympian
+Raw Teen
+Raw Teen 1
+Raw Teen 2
+Raw Teen 3
+Raw High School Varsity
+Raw Youth
+Raw Youth 1
+Raw Youth 2
+Raw Youth 3
+Special Olympian
+Teen
+Teen 1
+Teen 2
+Teen 3
+High School Varsity
+
+--
+Parameter: Weightclass
+
+Possible values:
+IPF - Female
+IPF - Male
+USAPL Nationals - Female
+USAPL Nationals - Male
+
+--
+Parameter: Exercise
+
+Possible values:
+Total
+Squat
+Bench press
+Deadlift
+
+--
+Parameter: State
+
+Possible values:
+All
+Alabama
+Alaska
+Arizona
+Arkansas
+California
+Colorado
+Connecticut
+Delaware
+Florida
+Georgia
+Hawaii
+Idaho
+Illinois
+Indiana
+Iowa
+Kansas
+Kentucky
+Louisiana
+Maine
+Maryland
+Massachusetts
+Michigan
+Minnesota
+Mississippi
+Missouri
+Montana
+Nationals
+Nebraska
+Nevada
+New Hampshire
+New Jersey
+New Mexico
+New York
+North Carolina
+North Dakota
+Ohio
+Oklahoma
+Oregon
+Pennsylvania
+Regionals
+Rhode Island
+South Carolina
+South Dakota
+Tennessee
+Texas
+Utah
+Vermont
+Virginia
+Washington
+Washington DC
+West Virginia
+Wisconsin
+Wyoming
+
+--
+Parameter: Year
+
+Possible values:
+All
+2017
+2016
+2015
+2014
+2013
+2012
+1900
+
+--
+Parameter: Order by
+
+Possible values:
+Points
+Weight
+
+--
