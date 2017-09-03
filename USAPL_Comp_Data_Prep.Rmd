@@ -1,0 +1,413 @@
+---
+title: "USAPL Competition Data Prep"
+author: "Yulia Zamriy"
+date: "September 2, 2017"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+## Overview
+
+This file contains the code to import and process csv files containing the results of USAPL Raw National competitions for 2014, 2015 and 2016.
+Output: Clean data set ready for the main analysis. 
+The code for the analysis is contained in the file called "USAPL_Raw_Nationals_Attempt_Analysis.rmd"
+
+### Data Import
+
+**Step 1.** Prepare works space
+
+- Clean workspace
+
+- Set working directory to the location for the csv files
+
+- Install and load nessary packages
+
+- Load the data
+
+```{r}
+rm(list=ls())
+setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Powerlifting/Clean code")
+#install.packages("tidyverse")
+library(tidyverse)
+
+Raw2014 <- read_csv("2014 Raw Nationals.csv")
+Raw2015 <- read_csv("2015 Raw Nationals.csv")
+Raw2016 <- read_csv("Raw Nationals 2016.csv")
+```
+
+```{r}
+str(Raw2014)
+str(Raw2015)
+str(Raw2016)
+```
+
+**Step 2.** Combine three datasets into one
+
+- *Placing* variable in Raw2016 was processed as char. 
+
+- Create an ID variable *Meet* for each file called Meet
+
+```{r}
+Raw2016$Placing <- as.numeric(Raw2016$Placing)
+
+Raw2014_2016 <- bind_rows("Raw2014" = Raw2014, 
+                          "Raw2015" = Raw2015, 
+                          "Raw2016" = Raw2016, 
+                          .id = "Meet")
+```
+
+```{r}
+dim(Raw2014_2016)
+table(Raw2014_2016$Meet)
+```
+
+**Step 3.** Recode weight classes from char to numeric:
+
+ - Weight classes are different for men vs. women. Hence, we can create *Sex* indicator and *Sex_factor* based on weight class. 
+ 
+ - There was one record in 2015 for a lifter in 40kg class (Youth). Since it's uncommon for youth compete at Raw Nationals, this record is deleted
+ 
+ - Char weight classes are preceeded by '-' to indicate 'under' specific weight
+ 
+ - Two weight classes that need special treatment for conversion to numeric are 84kg+ and 120kg+. For convenience, they will are recoded to 90 and 125 (so that in graphs they are visibly separate from under 84/120)
+
+```{r}
+table(Raw2014_2016$Weightclass)
+```
+
+```{r}
+Female <- c('-43', '-47', '-52', '-57', '-63', '-72', '-84', '84+')
+Male <- c('-40', '-44', '-48', '-53', '-59', '-66', '-74', '-83', '-93', '-105', '-120', '120+')
+
+Raw2014_2016$Sex <- 'f'
+Raw2014_2016$Sex[Raw2014_2016$Weightclass %in% Male] <- 'm'
+Raw2014_2016$Sex_factor <- factor(Raw2014_2016$Sex,
+                           levels = c('f','m'),
+                           labels = c("Female","Male"))
+
+Raw2014_2016 <- subset(Raw2014_2016, Weightclass != '-40')
+Raw2014_2016$Weightclass_Num <- as.numeric(Raw2014_2016$Weightclass) * -1
+Raw2014_2016$Weightclass_Num[Raw2014_2016$Weightclass == '120+'] <- 125
+Raw2014_2016$Weightclass_Num[Raw2014_2016$Weightclass == '84+'] <- 90
+```
+
+```{r}
+table(Raw2014_2016$Weightclass, Raw2014_2016$Weightclass_Num)
+table(Raw2014_2016$Sex, Raw2014_2016$Weightclass_Num)
+table(Raw2014_2016$Sex, Raw2014_2016$Sex_factor)
+```
+
+**Step 4.** Recode NAs for 9 attemps into 0
+
+- Variables 10:18 are: Squat1:Deadlift3
+
+```{r}
+summary(Raw2014_2016[,10:18])
+```
+
+```{r}
+recode_na <- function(x) {
+    x[is.na(x)] <- 0
+    x
+}
+
+Raw2014_2016[,10:18] <- lapply(Raw2014_2016[,10:18], recode_na)
+```
+
+```{r}
+summary(Raw2014_2016[,10:18])
+```
+
+**Step 5.** Create a counter for successful attempts
+
+- Failed attempts are represented as negative numbers
+
+- *Success*: number of successful attempts (possible values: 0 to 9)
+
+- *Success_rate*: % of successful attempts
+
+```{r}
+
+recode_neg_to_zero <- function(x, y) {
+    x[y <= 0] <- 0
+    x
+}
+
+Raw2014_2016$Squat1_success <- 1
+Raw2014_2016$Squat2_success <- 1
+Raw2014_2016$Squat3_success <- 1
+Raw2014_2016$BP1_success <- 1
+Raw2014_2016$BP2_success <- 1
+Raw2014_2016$BP3_success <- 1
+Raw2014_2016$DL1_success <- 1
+Raw2014_2016$DL2_success <- 1
+Raw2014_2016$DL3_success <- 1
+
+Raw2014_2016$Squat1_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$Squat1_success , Raw2014_2016$Squat1)
+Raw2014_2016$Squat2_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$Squat2_success , Raw2014_2016$Squat2)
+Raw2014_2016$Squat3_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$Squat3_success , Raw2014_2016$Squat3)
+Raw2014_2016$BP1_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$BP1_success , Raw2014_2016$`Bench press1`)
+Raw2014_2016$BP2_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$BP2_success , Raw2014_2016$`Bench press2`)
+Raw2014_2016$BP3_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$BP3_success , Raw2014_2016$`Bench press3`)
+Raw2014_2016$DL1_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$DL1_success , Raw2014_2016$Deadlift1)
+Raw2014_2016$DL2_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$DL2_success , Raw2014_2016$Deadlift2)
+Raw2014_2016$DL3_success <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$DL3_success , Raw2014_2016$Deadlift3)
+
+Raw2014_2016$Success <- 
+    Raw2014_2016$Squat1_success + 
+    Raw2014_2016$Squat2_success +
+    Raw2014_2016$Squat3_success +
+    Raw2014_2016$BP1_success +
+    Raw2014_2016$BP2_success +
+    Raw2014_2016$BP3_success +
+    Raw2014_2016$DL1_success +
+    Raw2014_2016$DL2_success +
+    Raw2014_2016$DL3_success
+
+Raw2014_2016$Success_rate <- Raw2014_2016$Success/9
+
+```
+
+```{r}
+lapply(Raw2014_2016[,25:34], table)
+summary(Raw2014_2016$Success_rate)
+```
+
+**Step 6.** Create a pattern for each possible combination of success/fail for each lift
+
+- This pattern will be used to subset the dataset to focus on the groups of interest
+
+- Result: 3 character variables: *Success_attempts*, *BP_attempts*, *Deadlift_attempts* and 3 factor variable corresponding to each
+
+```{r}
+success_count <- function(attempt1, attempt2, attempt3, attempts) {
+    
+    if((attempt1 <= 0) & (attempt2 <= 0) & (attempt3 <= 0)) {
+        attempts <- '000'
+    }
+    else if((attempt1 > 0) & (attempt2 <= 0) & (attempt3 <= 0)) {
+        attempts <- '100'
+    }
+    else if((attempt1 > 0) & (attempt2 > 0) & (attempt3 <= 0)) {
+        attempts <- '110'
+    }
+    else if((attempt1 > 0) & (attempt2 <= 0) & (attempt3 > 0)) {
+        attempts <- '101'
+    }
+    else if((attempt1 <= 0) & (attempt2 > 0) & (attempt3 <= 0)) {
+        attempts <- '010'
+    }
+    else if((attempt1 <= 0) & (attempt2 > 0) & (attempt3 > 0)) {
+        attempts <- '011'
+    }
+    else if((attempt1 <= 0) & (attempt2 <= 0) & (attempt3 > 0)){
+        attempts <- '001'
+    }
+    else{
+        attempts <- '111'
+    }
+}
+
+Raw2014_2016$Squat_attempts <- ''
+Raw2014_2016$BP_attempts <- ''
+Raw2014_2016$Deadlift_attempts <- ''
+
+Raw2014_2016$Squat_attempts <- mapply(success_count, 
+                                      Raw2014_2016$Squat1, 
+                                      Raw2014_2016$Squat2, 
+                                      Raw2014_2016$Squat3, 
+                                      Raw2014_2016$Squat_attempts)
+
+Raw2014_2016$BP_attempts <- mapply(success_count, 
+                                   Raw2014_2016$`Bench press1`, 
+                                   Raw2014_2016$`Bench press2`, 
+                                   Raw2014_2016$`Bench press3`, 
+                                   Raw2014_2016$BP_attempts)
+
+Raw2014_2016$Deadlift_attempts <- mapply(success_count, 
+                                         Raw2014_2016$Deadlift1, 
+                                         Raw2014_2016$Deadlift2, 
+                                         Raw2014_2016$Deadlift3, 
+                                         Raw2014_2016$Deadlift_attempts)
+
+Attempts_levels <- c("000" , "001" , "010" , "011" , "100" , "101" , "110" , "111")
+Attempts_labels <- c("000" , "001" , "010" , "011" , "100" , "101" , "Failed 3rd" , "All 3 Successful")
+
+Raw2014_2016$Squat_attempts_factor <- factor(Raw2014_2016$Squat_attempts,
+                                      levels = Attempts_levels,
+                                      labels = Attempts_labels)
+
+Raw2014_2016$BP_attempts_factor <- factor(Raw2014_2016$BP_attempts,
+                                   levels = Attempts_levels,
+                                   labels = Attempts_labels)
+
+Raw2014_2016$Deadlift_attempts_factor <- factor(Raw2014_2016$Deadlift_attempts,
+                                         levels = Attempts_levels,
+                                         labels = Attempts_labels)
+```
+
+```{r}
+table(Raw2014_2016$Squat_attempts, Raw2014_2016$Success)
+table(Raw2014_2016$BP_attempts, Raw2014_2016$Success)
+table(Raw2014_2016$Deadlift_attempts, Raw2014_2016$Success)
+table(Raw2014_2016$Squat_attempts, Raw2014_2016$Squat_attempts_factor)
+table(Raw2014_2016$BP_attempts, Raw2014_2016$BP_attempts_factor)
+table(Raw2014_2016$Deadlift_attempts, Raw2014_2016$Deadlift_attempts_factor)
+```
+
+**Step 7.** Create flags for lifters that successfully completed all 3 attempts on each lift
+
+```{r}
+Raw2014_2016$Squat_111 <- 0
+Raw2014_2016$Squat_111[Raw2014_2016$Squat_attempts == '111'] <- 1
+Raw2014_2016$BP_111 <- 0
+Raw2014_2016$BP_111[Raw2014_2016$BP_attempts == '111'] <- 1
+Raw2014_2016$Deadlift_111 <- 0
+Raw2014_2016$Deadlift_111[Raw2014_2016$Deadlift_attempts == '111'] <- 1
+```
+
+```{r}
+table(Raw2014_2016$Squat_111, Raw2014_2016$Sex)
+table(Raw2014_2016$BP_111, Raw2014_2016$Sex)
+table(Raw2014_2016$Deadlift_111, Raw2014_2016$Sex)
+```
+
+**Step 8.** Create variables for the relative and absolute differences between attempts
+
+- Since failed attempts are negative, we will extract absolute values for the analysis
+
+- If 3rd attempt is failed or equal 0, then *pct_of* and *kg_diff* variables are set to 0
+
+```{r}
+Raw2014_2016$Squat1_pct_of_3rd <- abs(Raw2014_2016$Squat1 / Raw2014_2016$Squat3)
+Raw2014_2016$Squat2_pct_of_3rd <- abs(Raw2014_2016$Squat2 / Raw2014_2016$Squat3)
+Raw2014_2016$BP1_pct_of_3rd <- abs(Raw2014_2016$`Bench press1` / Raw2014_2016$`Bench press3`)
+Raw2014_2016$BP2_pct_of_3rd <- abs(Raw2014_2016$`Bench press2` / Raw2014_2016$`Bench press3`)
+Raw2014_2016$DL1_pct_of_3rd <- abs(Raw2014_2016$Deadlift1 / Raw2014_2016$Deadlift3)
+Raw2014_2016$DL2_pct_of_3rd <- abs(Raw2014_2016$Deadlift2 / Raw2014_2016$Deadlift3)
+
+Raw2014_2016$Squat1_pct_of_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$Squat1_pct_of_3rd, Raw2014_2016$Squat3)
+Raw2014_2016$Squat2_pct_of_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$Squat2_pct_of_3rd, Raw2014_2016$Squat3)
+Raw2014_2016$BP1_pct_of_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$BP1_pct_of_3rd, Raw2014_2016$`Bench press3`)
+Raw2014_2016$BP2_pct_of_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$BP2_pct_of_3rd, Raw2014_2016$`Bench press3`)
+Raw2014_2016$DL1_pct_of_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$DL1_pct_of_3rd, Raw2014_2016$Deadlift3)
+Raw2014_2016$DL2_pct_of_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$DL2_pct_of_3rd, Raw2014_2016$Deadlift3)
+
+Raw2014_2016$Squat1_kg_diff_3rd <- abs(Raw2014_2016$Squat3) - abs(Raw2014_2016$Squat1)
+Raw2014_2016$Squat2_kg_diff_3rd <- abs(Raw2014_2016$Squat3) - abs(Raw2014_2016$Squat2)
+Raw2014_2016$BP1_kg_diff_3rd <- abs(Raw2014_2016$`Bench press3`) - abs(Raw2014_2016$`Bench press1`)
+Raw2014_2016$BP2_kg_diff_3rd <- abs(Raw2014_2016$`Bench press3`) - abs(Raw2014_2016$`Bench press2`)
+Raw2014_2016$DL1_kg_diff_3rd <- abs(Raw2014_2016$Deadlift3) - abs(Raw2014_2016$Deadlift1)
+Raw2014_2016$DL2_kg_diff_3rd <- abs(Raw2014_2016$Deadlift3) - abs(Raw2014_2016$Deadlift2)
+
+Raw2014_2016$Squat1_kg_diff_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$Squat1_kg_diff_3rd, Raw2014_2016$Squat1_kg_diff_3rd)
+Raw2014_2016$Squat2_kg_diff_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$Squat2_kg_diff_3rd, Raw2014_2016$Squat2_kg_diff_3rd)
+Raw2014_2016$BP1_kg_diff_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$BP1_kg_diff_3rd, Raw2014_2016$BP1_kg_diff_3rd)
+Raw2014_2016$BP2_kg_diff_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$BP2_kg_diff_3rd, Raw2014_2016$BP2_kg_diff_3rd)
+Raw2014_2016$DL1_kg_diff_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$DL1_kg_diff_3rd, Raw2014_2016$DL1_kg_diff_3rd)
+Raw2014_2016$DL2_kg_diff_3rd <- 
+    mapply(recode_neg_to_zero, Raw2014_2016$DL2_kg_diff_3rd, Raw2014_2016$DL2_kg_diff_3rd)
+```
+```{r}
+summary(Raw2014_2016[,45:56])
+```
+
+**Step 9.** Calculate best successful attempt and create ratio of best lifts out of Total (sum of 3 best lifts)
+
+- If a lifter fails all 3 attempts on one of the 3 lifts, their official Total = 0
+
+```{r}
+Raw2014_2016$Squat_best <- apply(Raw2014_2016[,c("Squat1", "Squat2", "Squat3")], 1, max)
+Raw2014_2016$BP_best <- apply(Raw2014_2016[,c("Bench press1", "Bench press2", "Bench press3")], 1, max)
+Raw2014_2016$DL_best <- apply(Raw2014_2016[,c("Deadlift1", "Deadlift2", "Deadlift3")], 1, max)
+
+Raw2014_2016$Squat_best <- mapply(recode_neg_to_zero, Raw2014_2016$Squat_best, Raw2014_2016$Squat_best)
+Raw2014_2016$BP_best <- mapply(recode_neg_to_zero, Raw2014_2016$BP_best, Raw2014_2016$BP_best)
+Raw2014_2016$DL_best <- mapply(recode_neg_to_zero, Raw2014_2016$DL_best, Raw2014_2016$DL_best)
+
+Raw2014_2016$Squat_shr <- Raw2014_2016$Squat_best / Raw2014_2016$Total
+Raw2014_2016$BP_shr <- Raw2014_2016$BP_best / Raw2014_2016$Total
+Raw2014_2016$DL_shr <- Raw2014_2016$DL_best / Raw2014_2016$Total
+
+Raw2014_2016$Squat_shr <- mapply(recode_neg_to_zero, Raw2014_2016$Squat_shr, Raw2014_2016$Total)
+Raw2014_2016$BP_shr <- mapply(recode_neg_to_zero, Raw2014_2016$BP_shr, Raw2014_2016$Total)
+Raw2014_2016$DL_shr <- mapply(recode_neg_to_zero, Raw2014_2016$DL_shr, Raw2014_2016$Total)
+```
+
+```{r}
+summary(Raw2014_2016[,57:62])
+aggregate(Squat_best ~ Sex, data = Raw2014_2016, mean)
+aggregate(BP_best ~ Sex, data = Raw2014_2016, mean)
+aggregate(DL_best ~ Sex, data = Raw2014_2016, mean)
+```
+
+**Step 10.** Create a grouping variable for Wilks points (standardization metric across weight classes)
+
+- Within "Raw" division, Wilks points usually range between 200 and 500. Currently Wilks max is held by Ray Williams with 593.5 points, but there are only around 60 lifters (male and female) with scores above 500
+
+```{r}
+aggregate(Points ~ Sex, data = Raw2014_2016, mean)
+
+```
+```{r}
+Raw2014_2016$Points_group <- 250
+Raw2014_2016$Points_group[Raw2014_2016$Points > 250] <- 275
+Raw2014_2016$Points_group[Raw2014_2016$Points > 275] <- 300
+Raw2014_2016$Points_group[Raw2014_2016$Points > 300] <- 325
+Raw2014_2016$Points_group[Raw2014_2016$Points > 325] <- 350
+Raw2014_2016$Points_group[Raw2014_2016$Points > 350] <- 375
+Raw2014_2016$Points_group[Raw2014_2016$Points > 375] <- 400
+Raw2014_2016$Points_group[Raw2014_2016$Points > 400] <- 425
+Raw2014_2016$Points_group[Raw2014_2016$Points > 425] <- 450
+Raw2014_2016$Points_group[Raw2014_2016$Points > 450] <- 475
+Raw2014_2016$Points_group[Raw2014_2016$Points > 475] <- 500
+```
+
+```{r}
+aggregate(Points ~ Points_group, data = Raw2014_2016, max)
+table(Raw2014_2016$Points_group, Raw2014_2016$Sex)
+
+```
+
+**Step 11.** Create a counter variable for number of Raw Nationals for each lifter 
+
+- Possible values for *meet_count*: 1 to 3
+
+```{r}
+Raw2014_2016 <- 
+    Raw2014_2016 %>%
+    group_by(Name) %>%
+    mutate(meet_count = n_distinct(Meet))
+```
+
+```{r}
+table(Raw2014_2016$meet_count)
+```
+
+
+
+
