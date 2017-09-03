@@ -1,3 +1,5 @@
+
+--
 Parameter: Sex
 
 Possible values:
@@ -55,11 +57,69 @@ High School Varsity
 --
 Parameter: Weightclass
 
+Federation: IPF - Female
 Possible values:
-IPF - Female
-IPF - Male
-USAPL Nationals - Female
-USAPL Nationals - Male
+-30
+-35
+-40
+-43
+-47
+-52
+-57
+-63
+-72
+-84
+84+
+
+Federation: IPF - Male
+Possible values:
+-30
+-35
+-40
+-44
+-48
+-53
+-59
+-66
+-74
+-83
+-93
+-105
+-120
+120+
+
+Federation: USAPL Nationals - Female
+Possible values:
+-30
+-35
+-40
+-44
+-48
+-52
+-56
+-60
+-67.5
+-75
+-82.5
+-90
+90+
+
+Federation: USAPL Nationals - Male
+Possible values:
+-30
+-35
+-40
+-52
+-56
+-60
+-67.5
+-75
+-82.5
+-90
+-100
+-110
+-125
+125+
 
 --
 Parameter: Exercise
@@ -142,11 +202,10 @@ All
 2012
 1900
 
+
 --
 Parameter: Order by
 
 Possible values:
 Points
 Weight
-
---
