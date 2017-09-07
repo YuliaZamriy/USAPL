@@ -46,6 +46,56 @@ However, I do have this data for myself. Hence, I can combine qualitative data f
 
 It is conducted once a year in October. Lifters need to qualify by competing in USAPL-sanctioned meet
 
+## Extracting the data from USAPL Database
+
+### Pulling_USAPL_parameters.py
+
+This file contains the code to pull USAPL parameters and put them in a nested dictionary [source](http://usapl.liftingdatabase.com/ranking)
+First layer of the dictionary contains the following keys:
+Sex, Division, Weightclass, Exercise, State, Year, Order by
+Second layer exists only for Weightclass. The keys are
+IPF - Female; IPF - Male; USAPL Nationals - Female; USAPL Nationals - Male
+The last two are old weight classes
+The output is also printed into a .txt file "usapl_parameters.txt"
+The goal is to use this dictionary to pull specific data drom the database.
+
+### Pulling_USAPL_comp_names.py
+
+This file contains the code to extract names for all the competitons in the database as of current date.
+The names are printed into a txt file "usapl_comps_date.txt"
+If the user of the program wants only a specific set of competitions, they have options:
+"level" is '' by default. If the user wants national competition, they should set level = 'NS'. For regional it is 'RG'
+'sub' is '' by default. If the user wants all the competitions that contain 'Raw' or '2017' in the name, then they should set it so.
+Competition names are not strictly regulated, hence, the user might need to spend some time figuring this out.
+
+### Pulling_USAPL_competitions.py
+
+his file contains the code to extract the data for a specific competition.
+It requires "Pulling_USAPL_comp_names.py" to be saved in the same directory.
+The user also should create a sub-directory 'CSV' where all the output file would be saved
+The output file is csv that can be read in for analysis.
+
+### Caveats
+
+This code is still in development. It works, but needs to be more streamlined.
+
+## Analyzing competitions
+
+This part is done in R Markdown language
+
+### Data prep
+
+"USAPL_Comp_Data_Prep" contains steps for data import of csv files from Pulling_USAPL_competitions.py
+In this particular case, we pulled Raw Nationals for 2014-2016 and combined 3 csv files into one.
+Then this file was processed and outputed into csv.
+
+### Data analysis
+
+"USAPL_Comp_Data_Analysis" takes the csv file created with "USAPL_Comp_Data_Prep" and runs the analysis
+
+### Caveats
+
+This project is still in progress. More analysis to be added.
 
 
 
