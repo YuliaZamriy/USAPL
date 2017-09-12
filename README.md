@@ -48,7 +48,7 @@ It is conducted once a year in October. Lifters need to qualify by competing in 
 
 ## Extracting the data from USAPL Database
 
-### Pulling_USAPL_parameters.py
+### usapl_parameters.py
 
 This file contains the code to pull USAPL parameters and put them in a nested dictionary [source](http://usapl.liftingdatabase.com/ranking)
 First layer of the dictionary contains the following keys:
