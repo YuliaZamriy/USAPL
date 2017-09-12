@@ -59,25 +59,26 @@ The last two are old weight classes
 The output is also printed into a .txt file "usapl_parameters.txt"
 The goal is to use this dictionary to pull specific data drom the database.
 
-### Pulling_USAPL_comp_names.py
+### Soup.py
 
-This file contains the code to extract names for all the competitons in the database as of current date.
+This file contains the code to initialize and create beautiful soup objects based on specified url's
+
+### CompetitionList.py
+
+This file contains the code to initialize and create CompetitionList object that contains names for all the competitons in the database as of current date.
+It requires "Soup.py" to be saved in the same directory.
 The names are printed into a txt file "usapl_comps_date.txt"
 If the user of the program wants only a specific set of competitions, they have options:
 "level" is '' by default. If the user wants national competition, they should set level = 'NS'. For regional it is 'RG'
 'sub' is '' by default. If the user wants all the competitions that contain 'Raw' or '2017' in the name, then they should set it so.
 Competition names are not strictly regulated, hence, the user might need to spend some time figuring this out.
 
-### Pulling_USAPL_competitions.py
+### Competition.py
 
-his file contains the code to extract the data for a specific competition.
-It requires "Pulling_USAPL_comp_names.py" to be saved in the same directory.
+This file contains the code to initalize and create Competition object that extracts the data for a specific competition.
+It requires "CompetitionList.py" to be saved in the same directory.
 The user also should create a sub-directory 'CSV' where all the output file would be saved
 The output file is csv that can be read in for analysis.
-
-### Caveats
-
-This code is still in development. It works, but needs to be more streamlined.
 
 ## Analyzing competitions
 
