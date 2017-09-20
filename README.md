@@ -48,7 +48,7 @@ It is conducted once a year in October. Lifters need to qualify by competing in 
 
 ## Extracting the data from USAPL Database
 
-### usapl_parameters.py
+### Parameters.py
 
 This file contains the code to pull USAPL parameters and put them in a nested dictionary [source](http://usapl.liftingdatabase.com/ranking)
 First layer of the dictionary contains the following keys:
@@ -61,11 +61,19 @@ The goal is to use this dictionary to pull specific data drom the database.
 
 ### Soup.py
 
-This file contains the code to initialize and create beautiful soup objects based on specified url's
+This file contains the function code to create beautiful soup objects based on specified url references
+
+### UsaplData.py
+
+This file contains the code to initialize parent UsaplData object 
+
+### RankingList.py
+
+This file contains the code to initialize and create RankingList object (parent = UsaplData) that contains lifters within specified ranking criteria.
 
 ### CompetitionList.py
 
-This file contains the code to initialize and create CompetitionList object that contains names for all the competitons in the database as of current date.
+This file contains the code to initialize and create CompetitionList object (parent = UsaplData) that contains names for all the competitons in the database as of current date.
 It requires "Soup.py" to be saved in the same directory.
 The names are printed into a txt file "usapl_comps_date.txt"
 If the user of the program wants only a specific set of competitions, they have options:
@@ -79,6 +87,10 @@ This file contains the code to initalize and create Competition object that extr
 It requires "CompetitionList.py" to be saved in the same directory.
 The user also should create a sub-directory 'CSV' where all the output file would be saved
 The output file is csv that can be read in for analysis.
+
+### Lifter.py
+
+This file contains the code to initalize and create Lifter object that extracts historic data for a specific lifter.
 
 ## Analyzing competitions
 
