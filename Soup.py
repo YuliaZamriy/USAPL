@@ -4,12 +4,10 @@ Created on Tue Sep 12 15:05:25 2017
 
 @author: yzamriy
 
-Goal:    Create Soup object based on the specified url reference 
+Goal:    Function returning Soup object based on the specified url reference 
 
 Input:   URL Reference, string
          This is the string that follows "http://usapl.liftingdatabase.com"
-
-Main methods: 
     
 Retruns: Beautiful Soup object
 """
