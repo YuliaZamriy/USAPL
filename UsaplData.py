@@ -23,7 +23,11 @@ class UsaplData(object):
         Goal:    Initializes UsaplData object
         Details: Competition object has following attributes:
                         self.reference: string. Part of the url address for target page
-                        self.data_dict: nested dictionary with data
+                        self.data_dict: nested dictionary with data scraped from
+                                        the target page: 
+                                            Level 1 keys: text within a['href'] tag
+                                            Level 2 keys -> text within 'th' tags
+                                            Values -> text within 'td' tags
                         self.col_names: list with key names from the dictionary
         '''
         self.reference = reference
@@ -32,7 +36,12 @@ class UsaplData(object):
 
     def build_dict(self):
         """ 
-        Goal:       Builds nested dictionary with data
+        Goal:       Builds nested dictionary with data scraped from the target page
+                    First, the data from the target page is processed with
+                    Beautiful Soup and put into a soup objest
+                    Then we extract the data within "tabledata" tag
+                    The data itself is contained within 'tr' tags
+                    Table headers between 'th' tags will be the keys
         Inputs:     none
         Returns:    nested dictionary  
         """
@@ -45,8 +54,8 @@ class UsaplData(object):
         for row in soup_table:
             row_name = row.find('a')['href']
             data_dict[row_name] = {}
-            for cl, cv in zip(soup_colnames, row.find_all('td')):
-                col_names = cl.get_text()
+            for cn, cv in zip(soup_colnames, row.find_all('td')):
+                col_names = cn.get_text()
                 col_value = cv.get_text().strip()
                 data_dict[row_name][col_names] = col_value
     
@@ -58,13 +67,14 @@ class UsaplData(object):
         Inputs:     none
         Returns:    list of key names 
         """
-        # Top level in the dictionary is url reference (Link)
-        col_names = ['Link']
         lifter = random.choice(list(self.data_dict))
-        for col in self.data_dict[lifter]:
-            col_names.append(col)
+        col_names = list(self.data_dict[lifter].keys())
+        # Create a name for the top level keys in the dictionary
+        # that contain url reference
+        col_names.insert(0, 'Link')
         return col_names               
                 
     def return_dict(self):
         return self.data_dict
 
+#test = UsaplData('competitions')
