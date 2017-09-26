@@ -92,6 +92,10 @@ The output file is csv that can be read in for analysis.
 
 This file contains the code to initalize and create Lifter object that extracts historic data for a specific lifter.
 
+### writetoCSV.py
+
+code to created instances of objects and write them out to csv files.
+
 ## Analyzing competitions
 
 This part is done in R Markdown language
