@@ -22,7 +22,11 @@ class Lifter(object):
         Goal:    Initializes Lifter object
         Details: Competition object has following attributes:
                         self.reference: url reference for the
-                        self.lifter_dict: nested dictionary with data
+                        self.lifter_dict: nested dictionary with data scraped from
+                                            the lifter specific page: 
+                                            Level 1 keys: text within 'a[href] tag
+                                            Level 2 keys -> text within 'th' tags
+                                            Values -> text within 'td' tags
         '''
         self.reference = reference
         self.lifter_dict = self.build_lifter_dict()
