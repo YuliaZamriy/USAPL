@@ -24,6 +24,7 @@ def writetoCSV_lev3(data_dict, col_names, filename):
     Ouput: csv file with results in the output directory
     Returns: Nothing
     '''
+    home_dir = os.getcwd()
     # subdirectory for csv output
     db_dir = "./CSV"
     os.chdir(db_dir)
@@ -39,6 +40,7 @@ def writetoCSV_lev3(data_dict, col_names, filename):
                 for level3 in data_dict[level1][level2]:
                     row.append(data_dict[level1][level2][level3])
                 writer.writerow(row)
+    os.chdir(home_dir)
 
 def writetoCSV_lev2(data_dict, col_names, filename):
     ''' 
@@ -47,6 +49,7 @@ def writetoCSV_lev2(data_dict, col_names, filename):
     Ouput: csv file with results in the output directory
     Returns: Nothing
     '''
+    home_dir = os.getcwd()
     # subdirectory for csv output
     db_dir = "./CSV"
     os.chdir(db_dir)
@@ -59,6 +62,8 @@ def writetoCSV_lev2(data_dict, col_names, filename):
             for col in data_dict[ref]:
                 row.append(data_dict[ref][col])
             writer.writerow(row)
+
+    os.chdir(home_dir)
 
 # Enter desired parameters
 # All possible values are stored in the file called "usapl_parameters.txt"
@@ -80,13 +85,22 @@ weightclass = 'F-84'
 division = 'FR-O'
 
 # create Roster object
-roster = Roster(par_list, rawinputfile, weightclass, division)
-writetoCSV_lev3(roster.return_dict(),roster.get_col_names(), roster.build_filename())
+#roster = Roster(par_list, rawinputfile, weightclass, division)
+#writetoCSV_lev3(roster.return_dict(),roster.get_col_names(), roster.build_filename())
 
 # create RankingList object
-rank = RankingList(par_list)
-writetoCSV_lev2(rank.return_dict(),rank.get_col_names(), rank.build_filename())
+#rank = RankingList(par_list)
+#writetoCSV_lev2(rank.return_dict(),rank.get_col_names(), rank.build_filename())
 
 # create Competition object based on competition URL reference
-comp = Competition('competitions-view?id=1763')
-writetoCSV_lev3(comp.return_hist_dict(),comp.get_hist_col_names(), comp.build_hist_filename())
+#print(CompetitionList(substring = "Raw Nationals").get_comp_names())
+#raw14 = Competition('competitions-view?id=860')
+#raw15 = Competition('competitions-view?id=992')
+#raw16 = Competition('competitions-view?id=1354')
+writetoCSV_lev2(raw14.return_dict(),raw14.get_col_names(), raw14.build_filename())
+writetoCSV_lev2(raw15.return_dict(),raw15.get_col_names(), raw15.build_filename())
+writetoCSV_lev2(raw16.return_dict(),raw16.get_col_names(), raw16.build_filename())
+writetoCSV_lev3(raw14.return_hist_dict(),raw14.get_hist_col_names(), raw14.build_hist_filename())
+writetoCSV_lev3(raw15.return_hist_dict(),raw15.get_hist_col_names(), raw15.build_hist_filename())
+writetoCSV_lev3(raw16.return_hist_dict(),raw16.get_hist_col_names(), raw16.build_hist_filename())
+
