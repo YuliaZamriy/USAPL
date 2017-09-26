@@ -17,7 +17,7 @@ Main methods:
     4. build_filename: returns filename for the csv file containing the dictionary
     5. get_col_names: returns column names corresponding to keys in the dictionary
     6. get_comp_lifter_history: get full history of competitions for each lifter
-    7. remove_prior: remove records from the history dictionary that happened
+    7. prior_history: remove records from the history dictionary that happened
                     after the competition
     8. build_hist_filename: returns filename for the csv file containing history dictionary
     9. return_hist_dict: returns the competition history dictionary
@@ -38,7 +38,11 @@ class Competition(object):
         Goal:    Initializes Competition object
         Details: Competition object has following attributes:
                         self.reference: url reference for the competition
-                        self.comp_dict: nested dictionary with data
+                        self.comp_dict: nested dictionary with data scraped from
+                                        the competition specific page: 
+                                            Level 1 keys: text within 'a' tag
+                                            Level 2 keys -> text within 'th' tags
+                                            Values -> text within 'td' tags
         '''
         self.reference = reference
         self.comp_dict = self.build_comp_dict()
@@ -55,22 +59,27 @@ class Competition(object):
         # First column in the scraped table doesn't have a name, but it 
         # contains lister weight class data
         col_names = ['Weightclass']
-        for cl in soup_colnames:
+        for cn in soup_colnames:
             # Each lift covers 3 columns (one for each attmept)
             # Raw scraped table has three columns but only one name
             # We create column names for each attempt column
             # Squat1, Squat2, Squat3, Bench Press1, etc.
-            if cl.get_text() in ['Squat','Bench press','Deadlift']:
+            if cn.get_text() in ['Squat','Bench press','Deadlift']:
                 for i in '123':
-                    col_names.append(cl.get_text()+i)
+                    col_names.append(cn.get_text()+i)
             else:
-               col_names.append(cl.get_text()) 
+               col_names.append(cn.get_text()) 
         return col_names
     
     def build_comp_dict(self):
         ''' 
-        Goal: Get competition results from Soup object and put them 
-                into a nested dictionary
+        Goal:       Builds nested dictionary with data scraped from the target 
+                    competition page
+                    First, the data from the target page is processed with
+                    Beautiful Soup and put into a soup objest
+                    Then we extract the data within "competition_view_results" tag
+                    The data itself is contained within 'tr' tags
+                    Table headers between 'th' tags will be the keys
         Returns: Competition results, nested dictionary
         '''    
         comp_dict = {}
@@ -116,12 +125,11 @@ class Competition(object):
         Goal:       Return column names corresponding to keys in the dictionary
         Returns:    list of key names 
         """
-        # Top level in the dictionary is lifter's name
-        col_names = ['Name']
         lifter = random.choice(list(self.comp_dict))
-        for col in self.comp_dict[lifter]:
-            col_names.append(col)
-        return col_names               
+        col_names = list(self.comp_dict[lifter].keys())
+        # Create a name for the top level keys in the dictionary
+        # that contain lifter's name
+        col_names.insert(0, 'Name')
 
     def get_comp_lifter_history(self):
         """ 
@@ -131,16 +139,16 @@ class Competition(object):
         lifters_history = {}
         for lifter in self.comp_dict:
             lifter_ref = self.get_lifter_ref(lifter)
-            lifters_history[lifter] = Lifter(lifter_ref).return_lifter_dict()
+            lifters_history[lifter] = Lifter(lifter_ref).return_dict()
         return lifters_history
 
-    def remove_prior(self):
+    def prior_history(self):
         """ 
-        Goal:       remove records from the history dictionary that happened
-                    after the competition
+        Goal:       remove records from the lifter history dictionary 
+                    that happened after the competition
         Returns:    nested dictionary
         """
-        comp_date = CompetitionList().get_comp_date(self.comp_ref)
+        comp_date = CompetitionList().get_comp_date(self.reference)
         comp_date = datetime.datetime.strptime(comp_date, '%m/%d/%Y') - datetime.timedelta(days=7)
         lifters_history = self.get_comp_lifter_history()
         lifters_history_prior = {}
@@ -159,7 +167,7 @@ class Competition(object):
         return self.get_comp_name()+"_lifter_history.csv"
 
     def return_hist_dict(self):
-        return self.remove_prior()
+        return self.prior_history()
 
     def get_hist_col_names(self):
         """ 
@@ -169,14 +177,17 @@ class Competition(object):
         # Top level in the dictionary is lifter's name
         # Next level is competition reference
         col_names = ['Name','Link']
-        hist_dict = self.remove_prior()
-        try:
+        hist_dict = self.prior_history()
+        # To extract column names we need a non-empty dictionary
+        # A lot of lifters compete for the first time, hence,
+        # their history is empty
+        # we'll keep looking for a lifter with history with a while loop
+        while True:
             lifter = random.choice(list(hist_dict))
-            comp = random.choice(list(hist_dict[lifter]))
-        except:
-            print(lifter, "first comp")
-        else:
-            for col in hist_dict[lifter][comp]:
-                col_names.append(col)
-        return col_names               
-
+            if len(hist_dict[lifter]) > 0:
+                comp = random.choice(list(hist_dict[lifter]))
+                col_names.extend(list(hist_dict[lifter][comp].keys()))
+                return col_names  
+            print("first comp for", lifter)
+                          
+# test = Competition('competitions-view?id=1622')
