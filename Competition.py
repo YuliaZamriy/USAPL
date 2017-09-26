@@ -31,6 +31,7 @@ import random
 import datetime 
 from CompetitionList import CompetitionList
 from Lifter import Lifter
+from Soup import *
 
 class Competition(object):
     def __init__(self, reference):
@@ -130,6 +131,7 @@ class Competition(object):
         # Create a name for the top level keys in the dictionary
         # that contain lifter's name
         col_names.insert(0, 'Name')
+        return col_names
 
     def get_comp_lifter_history(self):
         """ 
@@ -189,5 +191,6 @@ class Competition(object):
                 col_names.extend(list(hist_dict[lifter][comp].keys()))
                 return col_names  
             print("first comp for", lifter)
+        return col_names
                           
-# test = Competition('competitions-view?id=1622')
+#test = Competition('competitions-view?id=1622')
