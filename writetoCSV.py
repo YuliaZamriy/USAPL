@@ -79,7 +79,7 @@ order = 'Weight' # Possible Values: 'Points' and 'Weight'
 par_list = [sex,div,fed,wclass,exercise,state,year,order]
 
 # Name of the roster file
-rawinputfile = '2017 Raw Nationals Roster.csv'
+#rawinputfile = '2017 Raw Nationals Roster.csv'
 # Weightclass and division of interest (based on values in the row roster file)
 weightclass = 'F-84'
 division = 'FR-O'
@@ -97,10 +97,12 @@ division = 'FR-O'
 #raw14 = Competition('competitions-view?id=860')
 #raw15 = Competition('competitions-view?id=992')
 #raw16 = Competition('competitions-view?id=1354')
-writetoCSV_lev2(raw14.return_dict(),raw14.get_col_names(), raw14.build_filename())
-writetoCSV_lev2(raw15.return_dict(),raw15.get_col_names(), raw15.build_filename())
-writetoCSV_lev2(raw16.return_dict(),raw16.get_col_names(), raw16.build_filename())
-writetoCSV_lev3(raw14.return_hist_dict(),raw14.get_hist_col_names(), raw14.build_hist_filename())
-writetoCSV_lev3(raw15.return_hist_dict(),raw15.get_hist_col_names(), raw15.build_hist_filename())
-writetoCSV_lev3(raw16.return_hist_dict(),raw16.get_hist_col_names(), raw16.build_hist_filename())
+#writetoCSV_lev2(raw14.return_dict(),raw14.get_col_names(), raw14.build_filename())
+#writetoCSV_lev2(raw15.return_dict(),raw15.get_col_names(), raw15.build_filename())
+#writetoCSV_lev2(raw16.return_dict(),raw16.get_col_names(), raw16.build_filename())
+#writetoCSV_lev3(raw14.return_hist_dict(),raw14.get_hist_col_names(), raw14.build_hist_filename())
+#writetoCSV_lev3(raw15.return_hist_dict(),raw15.get_hist_col_names(), raw15.build_hist_filename())
+#writetoCSV_lev3(raw16.return_hist_dict(),raw16.get_hist_col_names(), raw16.build_hist_filename())
 
+raw17 = Competition('competitions-view?id=1776')
+writetoCSV_lev2(raw17.return_dict(),raw17.get_col_names(), raw17.build_filename())
