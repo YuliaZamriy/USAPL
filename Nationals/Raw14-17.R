@@ -1,15 +1,15 @@
 rm(list=ls())
-setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Powerlifting/CSV")
-install.packages("tidyverse")
+setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Git/Powerlifting/USAPL")
+#install.packages("tidyverse")
 
 library(tidyverse)
 library(ggplot2)
 library(car)
 
-Raw2014 <- read_csv("./USAPL/CSV/2014 Raw Nationals.csv")
-Raw2015 <- read_csv("./USAPL/CSV/2015 Raw Nationals.csv")
-Raw2016 <- read_csv("./USAPL/CSV/Raw Nationals 2016.csv")
-Raw2017 <- read_csv("./USAPL/CSV/2017 Raw National Championships.csv")
+Raw2014 <- read_csv("./CSV/2014 Raw Nationals.csv")
+Raw2015 <- read_csv("./CSV/2015 Raw Nationals.csv")
+Raw2016 <- read_csv("./CSV/Raw Nationals 2016.csv")
+Raw2017 <- read_csv("./CSV/2017 Raw National Championships.csv")
 
 Raw2016$Placing <- as.numeric(Raw2016$Placing)
 Raw2017$Placing <- as.numeric(Raw2017$Placing)
@@ -52,7 +52,7 @@ fem14_17 + geom_point(alpha = 0.2, size = 2) +
     xlab("Bodyweight (kg)") +
     ylab("Wilks Points") +
     ggtitle("Wilks Points distribution across female weightclasses",
-            subtitle = "For USAPL Raw National Champtionships 2014-2016")
+            subtitle = "For USAPL Raw National Champtionships 2014-2017")
 
 mal_data14_17 <- filter(Raw2014_2017, Total > 0 & Sex == 'm')
 
@@ -66,7 +66,7 @@ mal14_17 + geom_point(alpha = 0.2, size = 2) +
     xlab("Bodyweight (kg)") +
     ylab("Wilks Points") +
     ggtitle("Wilks Points distribution across male weightclasses",
-            subtitle = "For USAPL Raw National Champtionships 2014-2016")
+            subtitle = "For USAPL Raw National Champtionships 2014-2017")
 
 both <- ggplot(data = Raw2014_2017, aes(x = Meet, fill = Sex_factor))
 both + geom_bar(position = "dodge") +
