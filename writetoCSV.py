@@ -15,6 +15,7 @@ Retruns: Nothing
 """
 from Roster import Roster
 from Competition import Competition
+from RankingList import RankingList
 import os, csv
 
 def writetoCSV_lev3(data_dict, col_names, filename):
@@ -67,22 +68,22 @@ def writetoCSV_lev2(data_dict, col_names, filename):
 
 # Enter desired parameters
 # All possible values are stored in the file called "usapl_parameters.txt"
-sex = 'Female' # Possible Values: 'Male' and 'Female'
-div = 'Raw Open' # Possible Values: 'All', 'Raw Open', etc.
-fed = 'IPF - Female' # Possible Values: 'IPF - Female' and 'IPF - Male'
-wclass = '-84' # Possible Values: '-84', '84+', etc.
-exercise = 'Total' # Possible Values: 'Total', 'Squat', 'Bench press', 'Deadlift'
-state = 'All' # Possible Values: 'All', 'Nationals', 'Regionals', 'New York'
-year = 'All' # Possible Values: 'All', '2017', etc.
-order = 'Weight' # Possible Values: 'Points' and 'Weight'
-
-par_list = [sex,div,fed,wclass,exercise,state,year,order]
+#sex = 'Female' # Possible Values: 'Male' and 'Female'
+#div = 'Raw Open' # Possible Values: 'All', 'Raw Open', etc.
+#fed = 'IPF - Female' # Possible Values: 'IPF - Female' and 'IPF - Male'
+#wclass = '-84' # Possible Values: '-84', '84+', etc.
+#exercise = 'Total' # Possible Values: 'Total', 'Squat', 'Bench press', 'Deadlift'
+#state = 'All' # Possible Values: 'All', 'Nationals', 'Regionals', 'New York'
+#year = 'All' # Possible Values: 'All', '2017', etc.
+#order = 'Weight' # Possible Values: 'Points' and 'Weight'
+#
+#par_list = [sex,div,fed,wclass,exercise,state,year,order]
 
 # Name of the roster file
 #rawinputfile = '2017 Raw Nationals Roster.csv'
 # Weightclass and division of interest (based on values in the row roster file)
-weightclass = 'F-84'
-division = 'FR-O'
+#weightclass = 'F-84'
+#division = 'FR-O'
 
 # create Roster object
 #roster = Roster(par_list, rawinputfile, weightclass, division)
@@ -91,6 +92,9 @@ division = 'FR-O'
 # create RankingList object
 #rank = RankingList(par_list)
 #writetoCSV_lev2(rank.return_dict(),rank.get_col_names(), rank.build_filename())
+
+#lifter = Lifter('lifters-view?id=1768')
+#writetoCSV_lev2(lifter.return_dict(),lifter.get_col_names(), lifter.build_filename())
 
 # create Competition object based on competition URL reference
 #print(CompetitionList(substring = "Raw Nationals").get_comp_names())
@@ -104,5 +108,9 @@ division = 'FR-O'
 #writetoCSV_lev3(raw15.return_hist_dict(),raw15.get_hist_col_names(), raw15.build_hist_filename())
 #writetoCSV_lev3(raw16.return_hist_dict(),raw16.get_hist_col_names(), raw16.build_hist_filename())
 
-raw17 = Competition('competitions-view?id=1776')
-writetoCSV_lev2(raw17.return_dict(),raw17.get_col_names(), raw17.build_filename())
+#raw17 = Competition('competitions-view?id=1776')
+#writetoCSV_lev2(raw17.return_dict(),raw17.get_col_names(), raw17.build_filename())
+#writetoCSV_lev3(raw17.return_hist_dict(), raw17.get_hist_col_names(), raw17.build_hist_filename())
+
+#test_comp = Competition('competitions-view?id=1774')
+#writetoCSV_lev3(test_comp.return_hist_dict(), test_comp.get_hist_col_names(), test_comp.build_hist_filename())
