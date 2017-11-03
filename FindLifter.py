@@ -85,7 +85,7 @@ def lifterCSV(rawinputfile):
         lifter = Lifter(ref)
         writetoCSV_lev2(lifter.return_dict(),lifter.get_col_names(), lifter.build_filename())
 
-rawinputfile = 'LifterSearch.csv'
+rawinputfile = './Input files/LifterSearch.csv'
 lifterCSV(rawinputfile)
 #print(find_lifter(rawinputfile))
 

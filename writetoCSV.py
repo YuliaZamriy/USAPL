@@ -80,7 +80,7 @@ def writetoCSV_lev2(data_dict, col_names, filename):
 #par_list = [sex,div,fed,wclass,exercise,state,year,order]
 
 # Name of the roster file
-#rawinputfile = '2017 Raw Nationals Roster.csv'
+#rawinputfile = './Input files/2017 Raw Nationals Roster.csv'
 # Weightclass and division of interest (based on values in the row roster file)
 #weightclass = 'F-84'
 #division = 'FR-O'
