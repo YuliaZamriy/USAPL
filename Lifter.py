@@ -15,6 +15,7 @@ Requirements:   Soup.py to get Beautiful Soup objects
 """
 
 from Soup import *
+import random
 
 class Lifter(object):
     def __init__(self, reference):
@@ -52,6 +53,18 @@ class Lifter(object):
                col_names.append(cl.get_text()) 
         return col_names
 
+    def get_lifter_yob(self):
+        '''
+        Returns: competition name 
+        '''
+        soup = getSoup(self.reference)
+        if (soup.find("table").find('tbody').find('td')):
+            yob = soup.find("table").find('tbody').find('td').get_text()
+        else:
+            yob = '0000'
+        
+        return yob
+
     def build_lifter_dict(self):
         ''' 
         Goal: Get lifter history from Soup object and put them 
@@ -60,12 +73,15 @@ class Lifter(object):
         '''    
         soup = getSoup(self.reference)
         soup_table = soup.find("table", id="competition_view_results").find('tbody').find_all('tr')
+        # name row starts with "Lifter - "
+        lifter_name = soup.find("h2").get_text().strip()[9:]
+        yob = self.get_lifter_yob()
         col_names = self.build_col_names()
         
         lifter_dict = {}
         for lifter in soup_table:
             comp_ref = lifter.find('a')['href']
-            lifter_dict[comp_ref] = {}
+            lifter_dict[comp_ref] = {'Name': lifter_name, 'YOB': yob}
             for col_name, cv in zip(col_names, lifter.find_all('td')):
                 col_value = cv.get_text().strip()
                 lifter_dict[comp_ref][col_name] = col_value
@@ -75,4 +91,29 @@ class Lifter(object):
     def return_dict(self):
         return self.lifter_dict
 
-#print(Lifter('lifters-view?id=22161').return_lifter_dict())
+    def get_lifter_name(self):
+        '''
+        Returns: competition name 
+        '''
+        comp = random.choice(list(self.lifter_dict))
+        return self.lifter_dict[comp]['Name']
+
+    def get_col_names(self):
+        """ 
+        Goal:       Return column names corresponding to keys in the dictionary
+        Returns:    list of key names 
+        """
+        comp = random.choice(list(self.lifter_dict))
+        col_names = list(self.lifter_dict[comp].keys())
+        # Create a name for the top level keys in the dictionary
+        # that contain lifter's name
+        col_names.insert(0, 'Link')
+        return col_names
+
+    def build_filename(self):
+        '''
+        Returns: string, filename for the csv file containing the dictionary
+        '''
+        return self.get_lifter_name()+"_comp_history.csv"
+
+#print(Lifter('lifters-view?id=23702').get_lifter_yob())
