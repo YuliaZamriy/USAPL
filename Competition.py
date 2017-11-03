@@ -47,6 +47,7 @@ class Competition(object):
         '''
         self.reference = reference
         self.comp_dict = self.build_comp_dict()
+        self.history_dict = self.prior_history()
         
     def build_col_names(self):
         ''' 
@@ -151,7 +152,7 @@ class Competition(object):
         Returns:    nested dictionary
         """
         comp_date = CompetitionList().get_comp_date(self.reference)
-        comp_date = datetime.datetime.strptime(comp_date, '%m/%d/%Y') - datetime.timedelta(days=7)
+        comp_date = datetime.datetime.strptime(comp_date, '%m/%d/%Y') + datetime.timedelta(days=7)
         lifters_history = self.get_comp_lifter_history()
         lifters_history_prior = {}
         for lifter in lifters_history:
@@ -169,7 +170,7 @@ class Competition(object):
         return self.get_comp_name()+"_lifter_history.csv"
 
     def return_hist_dict(self):
-        return self.prior_history()
+        return self.history_dict
 
     def get_hist_col_names(self):
         """ 
