@@ -21,27 +21,6 @@ In the full meet, each lifter performs three attempts for each of the main lifts
 Best attempt is selected and summed into **Total**.
 To compare lifters across weight classes, Wilks Score (**Points**) is calculated. 
 
-## Goals of this analysis
-
-### Overview
-
-I am competing in 2017 Raw Nationals (my third competition of that level) and I need to determine my attempts ahead of time to structure the peaking cycle. 
-There are rules of thumb that I had used in the past (for example, first attempt should be the weight that I can relatively easy do for 3 reps in one set).
-But I want to use the data to get some insights on how the best lifters do their own attempt selection. Maybe there is something that I can use for myself.
-
-### Main caveats
-
-While analyzing this database, I need to keep the below in mind:
-
-- No data about meet preparation for all other lifters. Hence, I don't know how long their training cycle was, how often they trained, their best in the gym lifts.
-
-- No data about lifters' state during the competition: did they do a big water cut? were they injured? were they in strong/focused mental state? etc.
-
-- No data about their coaches and training programs 
-
-All of the above are very big determinants of the performance during the competition. Hence, I will need to keep that in my mind while interpreting the results.
-However, I do have this data for myself. Hence, I can combine qualitative data from my personal training with this analysis to figure out my own attempt selection strategy.
-
 ### What is USAPL Raw National competition?
 
 It is conducted once a year in October. Lifters need to qualify by competing in USAPL-sanctioned meet
@@ -96,23 +75,11 @@ This file contains the code to initalize and create Lifter object that extracts 
 
 code to created instances of objects and write them out to csv files.
 
-## Analyzing competitions
+### FindLifter.py
 
-This part is done in R Markdown language
-
-### Data prep
-
-"USAPL_Comp_Data_Prep" contains steps for data import of csv files from Pulling_USAPL_competitions.py
-In this particular case, we pulled Raw Nationals for 2014-2016 and combined 3 csv files into one.
-Then this file was processed and outputed into csv.
-
-### Data analysis
-
-"USAPL_Comp_Data_Analysis" takes the csv file created with "USAPL_Comp_Data_Prep" and runs the analysis
-
-### Caveats
-
-This project is still in progress. More analysis to be added.
+code to find lifters in the database and output each lifter's history to a csv file
+requires input file LifterSearch.csv (folder Input files)
+the template for the input file is int LifterSearchTemplate (folder Input files)
 
 
 
