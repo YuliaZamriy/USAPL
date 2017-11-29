@@ -1,18 +1,20 @@
 rm(list=ls())
-setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Git/Powerlifting/USAPL/CSV/")
+#setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Git/Powerlifting/USAPL/CSV/")
+setwd("C:/Users/zamriyka/Documents/GitHub/USAPL/CSV/")
+
 install.packages("tidyverse")
 install.packages("Hmisc")
 
 library(tidyverse)
 library(ggplot2)
 library(car)
-library(Hmisc)
+#library(Hmisc)
 
 Raw2017 <- read_csv("2017 Raw National Championships_lifter_history.csv")
-head(Raw2017)
-tail(Raw2017)
-dim(Raw2017)
-str(Raw2017)
+#head(Raw2017)
+#tail(Raw2017)
+#dim(Raw2017)
+#str(Raw2017)
 
 Raw2017$Placing <- as.numeric(Raw2017$Placing)
 #table(Raw2017$Placing)
@@ -25,28 +27,41 @@ Raw2017$Year <- format(Raw2017$Date, '%Y')
 # table(Raw2017$Division)
 # table(Raw2017$Weightclass, Raw2017$Division)
 
-Female_old <- c('-44', '-48', '90+')
-Male_old <- c('-100', '-110', '-125', '125+')
-Uni_old <- c('-30', '-35', '-40', '-52', '-56', '-60', '-67.5', '-75', '-82.5')
+# Female_old <- c('-44', '-48', '90+')
+# Male_old <- c('-100', '-110', '-125', '125+')
+# Uni_old <- c('-30', '-35', '-40', '-52', '-56', '-60', '-67.5', '-75', '-82.5')
 
 Female <- c('-43', '-47', '-52', '-57', '-63', '-72', '-84', '84+')
 Male <- c('-40', '-44', '-48', '-53', '-59', '-66', '-74', '-83', '-93', '-105', '-120', '120+')
 
+pushpull <- paste(c('Bench', 'Deadlift', 'Push', 'Pull'), collapse = '|')
+
 Raw2017 <- mutate(Raw2017,
                   Equipped =
                       ifelse(grepl('Equipped', Competition, ignore.case = TRUE), 1, 0),
-                  Weightclass_old = 
-                      ifelse(Weightclass %in% Female_old | Weightclass %in% Male_old | Weightclass %in% Uni_old, 1, 0),
+                  PushPullComp =
+                      ifelse(grepl(pushpull, Competition, ignore.case = TRUE), 1, 0),
+                  FullRawComp = 1 - Equipped - PushPullComp,
+                  #Weightclass_old = 
+                  #    ifelse(Weightclass %in% Female_old | Weightclass %in% Male_old | Weightclass %in% Uni_old, 1, 0),
                   Sex = 
                       ifelse(Weightclass %in% Female & Year == 2017 & Equipped == 0, 'f',
                       ifelse(Weightclass %in% Male & Year == 2017 & Equipped == 0, 'm', '?')))
+
+#table(Raw2017$Equipped)
+#table(Raw2017$PushPullComp)
+#table(Raw2017$FullRawComp)
+#View(with(filter(Raw2017, PushPullComp == 1), 
+#     table(Competition)))
 
 Sex <- 
     Raw2017 %>% 
     filter(Competition == '2017 Raw National Championships') %>% 
     select(Name, Sex)
 
-Raw2017 <- merge(Raw2017, Sex, by = 'Name')
+Raw2017 <- 
+  Raw2017 %>% 
+  left_join(Sex, by = 'Name')
 
 #table(Raw2017$Sex.x, Raw2017$Sex.y)
 
@@ -90,19 +105,49 @@ Raw2017 <- mutate(Raw2017,
                   UnderWeight = Weightclass_Num - Weight,
                   UnderWeightPct = UnderWeight/Weightclass_Num * 100,
                   BombOut = ifelse(Total > 0 , 0, 1), 
-                  Squat1Success = ifelse(Squat1 > 0 , 1, 0),
-                   Squat2Success = ifelse(Squat2 > 0 , 1, 0),
-                   Squat3Success = ifelse(Squat3 > 0 , 1, 0),
-                   BP1Success = ifelse(`Bench press1` > 0,  1, 0),
-                   BP2Success = ifelse(`Bench press2` > 0, 1, 0),
-                   BP3Success = ifelse(`Bench press3` > 0, 1, 0),
-                   DL1Success = ifelse(Deadlift1 > 0 , 1, 0),
-                   DL2Success = ifelse(Deadlift2 > 0 , 1, 0),
-                   DL3Success = ifelse(Deadlift3 > 0 , 1, 0),
-                   TotalSuccess = Squat1Success + Squat2Success + Squat3Success +
-                       BP1Success + BP2Success + BP3Success +
-                       DL1Success + DL2Success + DL3Success,
-                   SuccessRate = TotalSuccess / 9)
+                  Squat1Success = ifelse(Squat1 <= 0 | is.na(Squat1), 0, 1),
+                  Squat2Success = ifelse(Squat2 <= 0 | is.na(Squat2), 0, 1),
+                  Squat3Success = ifelse(Squat3 <= 0 | is.na(Squat3), 0, 1),
+                  BP1Success = ifelse(`Bench press1` <= 0 | is.na(`Bench press1`), 0, 1),
+                  BP2Success = ifelse(`Bench press2` <= 0 | is.na(`Bench press2`), 0, 1),
+                  BP3Success = ifelse(`Bench press3` <= 0 | is.na(`Bench press3`), 0, 1),
+                  DL1Success = ifelse(Deadlift1 <= 0 | is.na(Deadlift1), 0, 1),
+                  DL2Success = ifelse(Deadlift2 <= 0 | is.na(Deadlift2), 0, 1),
+                  DL3Success = ifelse(Deadlift3 <= 0 | is.na(Deadlift3), 0, 1),
+                  SquatSuccess = Squat1Success + Squat2Success + Squat3Success,
+                  BPSuccess = BP1Success + BP2Success + BP3Success,
+                  DLSuccess = DL1Success + DL2Success + DL3Success,
+                  TotalSuccess = SquatSuccess + BPSuccess + DLSuccess,
+                  SuccessRate = TotalSuccess / 9,
+                  NumOfAttemptsNA = ifelse(is.na(Squat1), 1, 0) + 
+                    ifelse(is.na(Squat2), 1, 0) +
+                    ifelse(is.na(Squat3), 1, 0) +
+                    ifelse(is.na(`Bench press1`), 1, 0) +
+                    ifelse(is.na(`Bench press2`), 1, 0) +
+                    ifelse(is.na(`Bench press3`), 1, 0) +
+                    ifelse(is.na(Deadlift1), 1, 0) +
+                    ifelse(is.na(Deadlift2), 1, 0) +
+                    ifelse(is.na(Deadlift3), 1, 0),
+                  SquatBest = ifelse(SquatSuccess > 0, pmax(Squat1, Squat2, Squat3), 0),
+                  BPBest = ifelse(BPSuccess > 0, pmax(`Bench press1`, `Bench press2`, `Bench press3`), 0),
+                  DLBest = ifelse(DLSuccess > 0, pmax(Deadlift1, Deadlift2, Deadlift3), 0),
+                  SquatShr = ifelse(Total > 0, SquatBest / Total, 0),
+                  BPShr = ifelse(Total > 0, BPBest / Total, 0),
+                  DLShr = ifelse(Total > 0, DLBest / Total, 0),
+                  Squat1to3 = ifelse(SquatSuccess > 0, abs(Squat1/Squat3), 0),
+                  BP1to3 = ifelse(BPSuccess > 0, abs(`Bench press1`/`Bench press3`), 0),
+                  DL1to3 = ifelse(DLSuccess > 0, abs(Deadlift1/Deadlift3), 0))
+                  
+# CompExl <-
+#   Raw2017 %>% 
+#   filter(PushPullComp == 1) %>% 
+#   group_by(Competition) %>% 
+#   summarize(attna = min(NumOfAttemptsNA)) %>% 
+#   mutate(PushPullCompExcl = ifelse(attna > 3, 1, 0))
+# Raw2017 <- 
+#   Raw2017 %>% 
+#   left_join(select(CompExl, Competition, PushPullCompExcl), by = 'Competition')
+
 
 Raw2017 <-  
     Raw2017 %>% 
@@ -208,8 +253,8 @@ table(Raw2017$Sex, Raw2017$Year)
 
 table(Raw2017$Division)
 
-with(filter(Raw2017, grepl('M', Division)), 
-     table(Division))
+with(filter(Raw2017, grepl('Pull', Competition)), 
+     table(Competition))
 
 select(Raw2017, Name, Weightclass, Sex, Equipped, Weightclass_Num) %>%
     filter(Weightclass_Num == 30)
