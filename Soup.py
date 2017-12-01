@@ -25,3 +25,8 @@ def getSoup(reference):
     response = http.request('GET', url)
 
     return BeautifulSoup(response.data, "lxml")
+
+#reference = "competitions"
+#competitions = getSoup(reference)
+
+#comptable = competitions.find("table", class_="tabledata").find('tbody').find_all('tr')

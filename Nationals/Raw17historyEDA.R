@@ -1,6 +1,63 @@
-summary(Raw2017only$Points)
-sum(is.na(Raw2017only$Points))
-sum(Raw2017only$Points == 0)
+# Charts
+
+theme_classic_yz <- 
+    theme_classic() +
+    theme(legend.position = "none",
+          line = element_blank(),
+          axis.text.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_text(size = rel(1.2), face = "bold", color = "grey40"),
+          axis.title.x = element_text(size = rel(1.5), color = "grey40"),
+          strip.text = element_text(size = rel(1.2), face = "bold", color = "grey40"),
+          strip.background = element_rect(color = "grey40"),
+          plot.title = element_text(hjust = 0.5, size = rel(1.5), face = "bold", color = "grey40"))
+
+g <- ggplot(data = Raw2017only, 
+            aes(x = Division_group, fill = Sex)) 
+
+g + geom_bar() +
+    facet_grid(.~Sex) +
+    labs(x = "Divisions",
+         y = "Lifter Count") +
+    scale_fill_manual("",
+                      values = c("Male" = "orange", 
+                                 "Female" = "darkgreen"))  +
+    geom_text(stat = "count", 
+              aes(label = ..count..), 
+              vjust = -0.5,
+              color = "grey40",
+              fontface = "bold") +
+    ggtitle("Number of Lifters at Raw Nationals in 2017") +
+    theme_classic_yz
+
+g <- ggplot(data = Raw2017only, 
+            mapping = aes(CompCount, group = Division_group, fill = Sex)) 
+
+g + geom_bar() +
+    labs(x = "Number of Competitions",
+         y = "Lifter Count") +
+    scale_x_continuous(breaks = seq(0,26,2)) +
+    scale_fill_manual("",
+                      values = c("Male" = "orange", 
+                                 "Female" = "darkgreen"))  +
+    ggtitle("Competition Experience (Number of Comps) of Lifters at Raw Natiionals in 2017") +
+    facet_grid(Division_group ~ Sex) +
+    theme(legend.position = "none")
+
+g <- ggplot(data = Raw2017only, 
+            mapping = aes(CompAgeYrs, group = Division_group, fill = Sex)) 
+
+g + geom_bar() +
+    labs(x = "Number of Years Competing",
+         y = "Lifter Count") +
+    scale_x_continuous(breaks = seq(0,5,1)) +
+    scale_fill_manual("",
+                      values = c("Male" = "orange", 
+                                 "Female" = "darkgreen"))  +
+    ggtitle("Competition Experience (in Years) of Lifters at Raw Natiionals in 2017") +
+    facet_grid(Division_group ~ Sex) +
+    theme(legend.position = "none")
+
 
 ind_vars <- c("Weight", "Sex", "Division_group", "CompAge", "UnderWeight", "UnderWeightPct", "WeightChg",
               "WeightChgPct", "CompCount", "FirstCompAge", "CompAgeYrs", "CompAgeDays",
@@ -54,35 +111,6 @@ cor_plot +
     ggtitle("Correlation between Lifter Success (Wilks Points) and Their Entry Parameters",
             subtitle = "at Raw Nationals 2017")
     
-# Charts
-
-g <- ggplot(data = Raw2017only, 
-            mapping = aes(CompCount, group = Division_group, fill = Sex)) 
-
-g + geom_bar() +
-    labs(x = "Number of Competitions",
-         y = "Lifter Count") +
-    scale_x_continuous(breaks = seq(0,26,2)) +
-    scale_fill_manual("",
-                      values = c("Male" = "orange", 
-                                 "Female" = "darkgreen"))  +
-    ggtitle("Competition Experience (Number of Comps) of Lifters at Raw Natiionals in 2017") +
-    facet_grid(Division_group ~ Sex) +
-    theme(legend.position = "none")
-
-g <- ggplot(data = Raw2017only, 
-            mapping = aes(CompAgeYrs, group = Division_group, fill = Sex)) 
-
-g + geom_bar() +
-    labs(x = "Number of Years Competing",
-         y = "Lifter Count") +
-    scale_x_continuous(breaks = seq(0,5,1)) +
-    scale_fill_manual("",
-                      values = c("Male" = "orange", 
-                                 "Female" = "darkgreen"))  +
-    ggtitle("Competition Experience (in Years) of Lifters at Raw Natiionals in 2017") +
-    facet_grid(Division_group ~ Sex) +
-    theme(legend.position = "none")
 
 
 # Regressions

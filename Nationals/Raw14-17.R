@@ -1,15 +1,17 @@
 rm(list=ls())
-setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Git/Powerlifting/USAPL")
-#install.packages("tidyverse")
+setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Git/Powerlifting/USAPL/CSV/")
+#setwd("C:/Users/zamriyka/Documents/GitHub/USAPL/CSV/")
+
+install.packages("tidyverse")
 
 library(tidyverse)
 library(ggplot2)
-library(car)
+#library(car)
 
-Raw2014 <- read_csv("./CSV/2014 Raw Nationals.csv")
-Raw2015 <- read_csv("./CSV/2015 Raw Nationals.csv")
-Raw2016 <- read_csv("./CSV/Raw Nationals 2016.csv")
-Raw2017 <- read_csv("./CSV/2017 Raw National Championships.csv")
+Raw2014 <- read_csv("2014 Raw Nationals.csv")
+Raw2015 <- read_csv("2015 Raw Nationals.csv")
+Raw2016 <- read_csv("Raw Nationals 2016.csv")
+Raw2017 <- read_csv("2017 Raw National Championships.csv")
 
 Raw2016$Placing <- as.numeric(Raw2016$Placing)
 Raw2017$Placing <- as.numeric(Raw2017$Placing)
@@ -20,11 +22,17 @@ Raw2014_2017 <- bind_rows("Raw2014" = Raw2014,
                           "Raw2017" = Raw2017,
                           .id = "Meet")
 
+rm(Raw2014)
+rm(Raw2015)
+rm(Raw2016)
+rm(Raw2017)
+
 Female <- c('-43', '-47', '-52', '-57', '-63', '-72', '-84', '84+')
 Male <- c('-40', '-44', '-48', '-53', '-59', '-66', '-74', '-83', '-93', '-105', '-120', '120+')
 
-Raw2014_2017$Sex <- 'f'
-Raw2014_2017$Sex[Raw2014_2017$Weightclass %in% Male] <- 'm'
+Raw2014_2017 <- mutate(Raw2014_2017,
+                        Sex = ifelse(Weightclass %in% Female, 'f', 'm'))
+
 Raw2014_2017$Sex_factor <- factor(Raw2014_2017$Sex,
                                   levels = c('f','m'),
                                   labels = c("Female","Male"))

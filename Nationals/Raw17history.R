@@ -1,6 +1,6 @@
 rm(list=ls())
 #setwd("C:/Users/yzamriy/Documents/Tools and Methodology/DS/Git/Powerlifting/USAPL/CSV/")
-setwd("C:/Users/zamriyka/Documents/GitHub/USAPL/CSV/")
+#setwd("C:/Users/zamriyka/Documents/GitHub/USAPL/CSV/")
 
 install.packages("tidyverse")
 install.packages("Hmisc")
@@ -10,22 +10,22 @@ library(ggplot2)
 library(car)
 #library(Hmisc)
 
-Raw2017 <- read_csv("2017 Raw National Championships_lifter_history.csv")
-#head(Raw2017)
-#tail(Raw2017)
-#dim(Raw2017)
-#str(Raw2017)
+Raw2017Hist <- read_csv("2017 Raw National Championships_lifter_history.csv")
+#head(Raw2017Hist)
+#tail(Raw2017Hist)
+#dim(Raw2017Hist)
+#str(Raw2017Hist)
 
-Raw2017$Placing <- as.numeric(Raw2017$Placing)
-#table(Raw2017$Placing)
+Raw2017Hist$Placing <- as.numeric(Raw2017Hist$Placing)
+#table(Raw2017Hist$Placing)
 
-Raw2017$Date <- as.Date(Raw2017$Date, format = '%m/%d/%Y')
-Raw2017$Year <- format(Raw2017$Date, '%Y')
-#table(Raw2017$Year)
+Raw2017Hist$Date <- as.Date(Raw2017Hist$Date, format = '%m/%d/%Y')
+Raw2017Hist$Year <- format(Raw2017Hist$Date, '%Y')
+#table(Raw2017Hist$Year)
 
-# table(Raw2017$Weightclass)
-# table(Raw2017$Division)
-# table(Raw2017$Weightclass, Raw2017$Division)
+# table(Raw2017Hist$Weightclass)
+# table(Raw2017Hist$Division)
+# table(Raw2017Hist$Weightclass, Raw2017Hist$Division)
 
 # Female_old <- c('-44', '-48', '90+')
 # Male_old <- c('-100', '-110', '-125', '125+')
@@ -36,7 +36,7 @@ Male <- c('-40', '-44', '-48', '-53', '-59', '-66', '-74', '-83', '-93', '-105',
 
 pushpull <- paste(c('Bench', 'Deadlift', 'Push', 'Pull'), collapse = '|')
 
-Raw2017 <- mutate(Raw2017,
+Raw2017Hist <- mutate(Raw2017Hist,
                   Equipped =
                       ifelse(grepl('Equipped', Competition, ignore.case = TRUE), 1, 0),
                   PushPullComp =
@@ -48,35 +48,35 @@ Raw2017 <- mutate(Raw2017,
                       ifelse(Weightclass %in% Female & Year == 2017 & Equipped == 0, 'f',
                       ifelse(Weightclass %in% Male & Year == 2017 & Equipped == 0, 'm', '?')))
 
-#table(Raw2017$Equipped)
-#table(Raw2017$PushPullComp)
-#table(Raw2017$FullRawComp)
-#View(with(filter(Raw2017, PushPullComp == 1), 
+#table(Raw2017Hist$Equipped)
+#table(Raw2017Hist$PushPullComp)
+#table(Raw2017Hist$FullRawComp)
+#View(with(filter(Raw2017Hist, PushPullComp == 1), 
 #     table(Competition)))
 
 Sex <- 
-    Raw2017 %>% 
+    Raw2017Hist %>% 
     filter(Competition == '2017 Raw National Championships') %>% 
     select(Name, Sex)
 
-Raw2017 <- 
-  Raw2017 %>% 
+Raw2017Hist <- 
+  Raw2017Hist %>% 
   left_join(Sex, by = 'Name')
 
-#table(Raw2017$Sex.x, Raw2017$Sex.y)
+#table(Raw2017Hist$Sex.x, Raw2017Hist$Sex.y)
 
-Raw2017$Sex <- Raw2017$Sex.y
-Raw2017$Sex.x <- NULL
-Raw2017$Sex.y <- NULL
+Raw2017Hist$Sex <- Raw2017Hist$Sex.y
+Raw2017Hist$Sex.x <- NULL
+Raw2017Hist$Sex.y <- NULL
 
-Raw2017$Sex <- factor(Raw2017$Sex,
+Raw2017Hist$Sex <- factor(Raw2017Hist$Sex,
                              levels = c('f','m'),
                              labels = c("Female","Male"))
 
 open_div <- paste(c('R-O', 'R-MI', 'R-G', 'R-LW', 'R-HW', 'R-PF'), collapse = '|')
 col_hs_div <- paste(c('R-C', 'R-HS', 'R-V'), collapse = '|')
 
-Raw2017 <- mutate(Raw2017,
+Raw2017Hist <- mutate(Raw2017Hist,
                   Division_group =
                       ifelse(grepl(open_div, Division), 'Open',
                              ifelse(grepl('R-M', Division), 'Master',
@@ -88,7 +88,7 @@ Raw2017 <- mutate(Raw2017,
                                                                        '?'))))))))
 
 # check max weights for super heavyweights
-group_by(Raw2017, Weightclass) %>% 
+group_by(Raw2017Hist, Weightclass) %>% 
     dplyr::summarize(maxw = max(Weight)) %>% 
     filter(grepl('\\+', Weightclass))
 
@@ -97,7 +97,7 @@ group_by(Raw2017, Weightclass) %>%
 #3         84+ 168.60
 #4         90+ 120.00
 
-Raw2017 <- mutate(Raw2017,
+Raw2017Hist <- mutate(Raw2017Hist,
                   CompAge = as.numeric(Year) - YOB,
                   Weightclass_Num =
                       ifelse(grepl("\\+", Weightclass), as.numeric(sub("\\+", "", Weightclass)) * 2,
@@ -139,18 +139,18 @@ Raw2017 <- mutate(Raw2017,
                   DL1to3 = ifelse(DLSuccess > 0, abs(Deadlift1/Deadlift3), 0))
                   
 # CompExl <-
-#   Raw2017 %>% 
+#   Raw2017Hist %>% 
 #   filter(PushPullComp == 1) %>% 
 #   group_by(Competition) %>% 
 #   summarize(attna = min(NumOfAttemptsNA)) %>% 
 #   mutate(PushPullCompExcl = ifelse(attna > 3, 1, 0))
-# Raw2017 <- 
-#   Raw2017 %>% 
+# Raw2017Hist <- 
+#   Raw2017Hist %>% 
 #   left_join(select(CompExl, Competition, PushPullCompExcl), by = 'Competition')
 
 
-Raw2017 <-  
-    Raw2017 %>% 
+Raw2017Hist <-  
+    Raw2017Hist %>% 
     arrange(Name, desc(Date)) %>% 
     group_by(Name) %>% 
     mutate(TotalChg = Total - lead(Total, order_by = Name),
@@ -166,20 +166,20 @@ Raw2017 <-
            PointsChgPerWeightChg = round(PointsChg / WeightChg, 1),
            CompNum = min_rank(Date))
 
-Raw2017aggr <- 
-    Raw2017 %>% 
-    dplyr::group_by(Name) %>% 
-    dplyr::summarize(CompCount = n(),
+Raw2017Histaggr <- 
+    Raw2017Hist %>% 
+    group_by(Name) %>% 
+    summarize(CompCount = n(),
               FirstCompDate = min(Date),
               FirstCompAge = min(CompAge),
               MinWeight = min(Weight),
               MaxWeight = max(Weight),
               AvgMonthsSincePrevComp = as.numeric(mean(MonthsSincePrevComp, na.rm = TRUE)))
 
-Raw2017 <- left_join(Raw2017, Raw2017aggr, by = 'Name')
+Raw2017Hist <- left_join(Raw2017Hist, Raw2017Histaggr, by = 'Name')
 
-Raw2017 <-
-    Raw2017 %>% 
+Raw2017Hist <-
+    Raw2017Hist %>% 
     mutate(CompAgeYrs = as.numeric(CompAge - FirstCompAge),
            CompAgeDays = as.numeric(Date - FirstCompDate))
 
@@ -218,44 +218,44 @@ var_labels <- c(Date = "Competition Date",
                 AvgMonthsSincePrevComp = "Average Number of Months bw Competitions",
                 CompNum = "Competition Number")
 
-Raw2017 <- 
-    Raw2017 %>% 
-    upData(labels = var_labels)
+Raw2017Hist <- 
+    Raw2017Hist %>% 
+    Hmisc::upData(labels = var_labels)
 
 # Competitor level / Raw 2017 only
 
-Raw2017only <- filter(Raw2017, Competition == '2017 Raw National Championships')
+Raw2017only <- filter(Raw2017Hist, Competition == '2017 Raw National Championships')
 
 # EDA
 
 
-Raw2017 <-  
-    Raw2017 %>% 
-    arrange(Name, desc(Date)) %>% 
-    group_by(Name) %>% 
-    mutate(CompNum = min_rank(Date))
+# Raw2017Hist <-  
+#     Raw2017Hist %>% 
+#     arrange(Name, desc(Date)) %>% 
+#     group_by(Name) %>% 
+#     mutate(CompNum = min_rank(Date))
 
-View(group_by(Raw2017, Weightclass_Num, Weightclass) %>% 
+View(group_by(Raw2017Hist, Weightclass_Num, Weightclass) %>% 
          summarize(maxw = max(Weight)))
 
 
-summary(Raw2017$CompCount)
-table(Raw2017$Weightclass)
+summary(Raw2017Hist$CompCount)
+table(Raw2017Hist$Weightclass)
 
 
-table(Raw2017$Division, Raw2017$Division_group)
-table(Raw2017$Division_group)
+table(Raw2017Hist$Division, Raw2017Hist$Division_group)
+table(Raw2017Hist$Division_group)
 
-select(Raw2017, Name, Weightclass, Sex, Sex_final) %>%
+select(Raw2017Hist, Name, Weightclass, Sex, Sex_final) %>%
     filter(Sex == 'f' & Sex_final == 'm')
 
-table(Raw2017$Sex, Raw2017$Year)
+table(Raw2017Hist$Sex, Raw2017Hist$Year)
 
-table(Raw2017$Division)
+table(Raw2017Hist$Division)
 
-with(filter(Raw2017, grepl('Pull', Competition)), 
+with(filter(Raw2017Hist, grepl('Pull', Competition)), 
      table(Competition))
 
-select(Raw2017, Name, Weightclass, Sex, Equipped, Weightclass_Num) %>%
+select(Raw2017Hist, Name, Weightclass, Sex, Equipped, Weightclass_Num) %>%
     filter(Weightclass_Num == 30)
 

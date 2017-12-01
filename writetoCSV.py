@@ -98,12 +98,16 @@ def writetoCSV_lev2(data_dict, col_names, filename):
 
 # create Competition object based on competition URL reference
 #print(CompetitionList(substring = "Raw Nationals").get_comp_names())
+raw12 = Competition('competitions-view?id=616')
+#raw13 = Competition('competitions-view?id=500')
 #raw14 = Competition('competitions-view?id=860')
 #raw15 = Competition('competitions-view?id=992')
 #raw16 = Competition('competitions-view?id=1354')
 #writetoCSV_lev2(raw14.return_dict(),raw14.get_col_names(), raw14.build_filename())
 #writetoCSV_lev2(raw15.return_dict(),raw15.get_col_names(), raw15.build_filename())
 #writetoCSV_lev2(raw16.return_dict(),raw16.get_col_names(), raw16.build_filename())
+writetoCSV_lev3(raw12.return_hist_dict(),raw12.get_hist_col_names(), raw12.build_hist_filename())
+writetoCSV_lev3(raw13.return_hist_dict(),raw13.get_hist_col_names(), raw13.build_hist_filename())
 #writetoCSV_lev3(raw14.return_hist_dict(),raw14.get_hist_col_names(), raw14.build_hist_filename())
 #writetoCSV_lev3(raw15.return_hist_dict(),raw15.get_hist_col_names(), raw15.build_hist_filename())
 #writetoCSV_lev3(raw16.return_hist_dict(),raw16.get_hist_col_names(), raw16.build_hist_filename())
@@ -112,5 +116,3 @@ def writetoCSV_lev2(data_dict, col_names, filename):
 #writetoCSV_lev2(raw17.return_dict(),raw17.get_col_names(), raw17.build_filename())
 #writetoCSV_lev3(raw17.return_hist_dict(), raw17.get_hist_col_names(), raw17.build_hist_filename())
 
-#test_comp = Competition('competitions-view?id=1774')
-#writetoCSV_lev3(test_comp.return_hist_dict(), test_comp.get_hist_col_names(), test_comp.build_hist_filename())
