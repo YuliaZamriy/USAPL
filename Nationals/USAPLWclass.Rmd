@@ -1,0 +1,247 @@
+---
+title: "USAPL Weightcalss Composition by Year"
+author: "Yulia Zamriy"
+date: "December 6, 2017"
+output: 
+  html_document: 
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 9
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Overview
+
+The main goal of this document is to outline all the steps for creating a figure that:
+
+- Contains weight class composition (%) at USAPL Raw Nationals by Year
+
+- Splits Male vs. Female classes
+
+- Has a table with total lifters each year by gender
+
+Please note, that this is part of a bigger analysis. Hence, not all the background information is provided. For more details see [here](https://github.com/YuliaZamriy/USAPL)
+
+### Requirements
+
+The following packages need to be installed:
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(grid)
+```
+
+The below .csv file is available for download here.
+
+```{r}
+WclassData <- read_csv("./CSV/Raw2014_2016_Weightclass.csv")
+```
+
+### Data description
+
+This dataset contains a subset of the USAPL Raw Nationals results for 2014-2017:
+
+- Open Divisions only
+
+- First column is row counter to hide lifter names. It will be ignored in this report
+
+- Sex (Factor) Data analysis will be split by gender
+
+- Year (Integer) Year of the competition
+
+- Weightclass (Character) Weight classes. "-" indicates under specified weight. "+" specified weight and above
+
+- Weightclass_Num (Integer) Weight classes transformed into numbers. Two "+" classes (84+, 120+) are coded as 85 and 121
+
+```{r}
+str(WclassData)
+table(WclassData$Sex)
+table(WclassData$Year)
+table(WclassData$Weightclass, WclassData$Weightclass_Num)
+```
+
+### Data transformation
+
+First, we need to do some basic transformation to make the data more suitable for this analysis
+
+Weightclass_Num is converted into a factor variable to make labels on the charts appear in the correct order and with correct weight class names
+
+```{r}
+
+Female <- c('-43', '-47', '-52', '-57', '-63', '-72', '-84', '84+')
+Male <- c('-40','-53', '-59', '-66', '-74', '-83', '-93', '-105', '-120', '120+')
+
+WclassData <- mutate(WclassData, 
+                    Weightclass_Num = factor(Weightclass_Num,
+                                             levels = c(43, 47, 52, 57, 63, 72, 84, 85, 
+                                                        40, 53, 59, 66, 74, 83, 93, 105, 120, 121),
+                                             labels = c(Female, Male)))
+```
+
+### Data aggregation
+
+To create plots with labels we need:
+
+- Aggregate data by Year and Weight Class, separately for Male vs. Female
+
+- Manually create variables containing labels as % and label positions (relative to the y axis on the chart)
+
+```{r}
+wc_split_f <- 
+    WclassData %>%
+    filter(Sex == "Female") %>% 
+    group_by(Year, Weightclass_Num) %>% 
+    summarize(NLifters = n()) %>% 
+    mutate(perc = 100*NLifters/sum(NLifters),
+           label = ifelse(perc > 2.5, paste0(round(perc,0),"%"), ""),
+           labpos = ifelse(cumsum(perc) >= 97 , 3,
+                        ifelse(cumsum(perc) <= 3, 99,
+                               100 - cumsum(perc) + 3)))
+
+wc_split_m <- 
+    WclassData %>%
+    filter(Sex == "Male") %>% 
+    group_by(Year, Weightclass_Num) %>% 
+    summarize(NLifters = n()) %>% 
+    mutate(perc = 100*NLifters/sum(NLifters),
+           label = ifelse(perc > 2, paste0(round(perc,0),"%"), ""),
+           labpos = ifelse(cumsum(perc) >= 97 , 3,
+                        ifelse(cumsum(perc) <= 3, 99,
+                               100 - cumsum(perc) + 3)))
+
+```
+
+### Building pieces of the figure
+
+Since I am building two identical charts (Female vs. Male), it is convenient to create a custom theme variable first
+
+```{r}
+theme_classic_adj <- 
+    theme_classic() +
+    theme(line = element_blank(),
+          axis.text.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_text(size = rel(1.2), face = "bold", color = "grey40"),
+          axis.title.x = element_text(size = rel(1.5), color = "grey40"),
+          strip.text = element_text(size = rel(1.2), face = "bold", color = "grey40"),
+          strip.background = element_rect(color = "grey40"),
+          plot.title = element_text(hjust = 0.03, face = "bold.italic", color = "grey60"))
+```
+
+Then I am building stacked bar charts (each column adds to 100%) and manually created labels at the desired positions
+
+```{r}
+plot_f <- ggplot(wc_split_f, aes(x = Year, y = perc, fill = Weightclass_Num)) +
+        geom_bar(stat = "identity") +
+        geom_text(aes(label = label, y = labpos),
+                  color = "grey10",
+                  fontface = "bold") + 
+        labs(fill = "Weightclass", x = NULL, title = "Female Divisions") +
+        scale_fill_brewer(palette = "Spectral") +
+        theme_classic_adj 
+
+plot_m <- ggplot(wc_split_m, aes(x = Year, y = perc, fill = Weightclass_Num)) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = label, y = labpos),
+              color = "grey10",
+              fontface = "bold") + 
+    labs(fill = "Weightclass", x = NULL, title = "Male Divisions") +
+    scale_fill_brewer(palette = "Spectral") +
+    theme_classic_adj 
+```
+
+I want to add a table under the charts with total lifter count each year. For that I need to further summarize the data and transpose it, so it appears as a row
+
+```{r}
+count_f1 <- wc_split_f %>% 
+    group_by(Year) %>% 
+    summarize(NLifters = sum(NLifters)) %>% 
+    t() %>% 
+    data.frame()
+
+count_m1 <- wc_split_m %>% 
+    group_by(Year) %>% 
+    summarize(NLifters = sum(NLifters)) %>% 
+    t() %>% 
+    data.frame()
+
+```
+
+Then I convert these two small datasets into "table grobs" using common theme
+
+```{r}
+tt <- ttheme_minimal(core=list(fg_params=list(fontface=2, col="white", fontsize = 10),
+                                bg_params = list(fill = "grey40", col=NA)))
+
+count_f2 <- tableGrob(count_f1[2,], cols = NULL, rows = NULL, theme = tt)
+count_f2$widths <- unit(rep(1/ncol(count_f2), ncol(count_f2)), "npc")
+
+count_m2 <- tableGrob(count_m1[2,], cols = NULL, rows = NULL, theme = tt)
+count_m2$widths <- unit(rep(1/ncol(count_m2), ncol(count_m2)), "npc")
+
+```
+
+### Assembling pieces into the figure
+
+First, I'll combine two created table grobs the following way:
+
+- Text label (Number of Lifters) that is created as "text grob"
+
+- First table grob
+
+- Blank space "rect grob"
+
+- Second table grob
+
+- Space allocated to each is arbitrary
+
+```{r}
+countlab <- textGrob("Number\nof Lifters", 
+                 gp = gpar(col = "grey40", fontsize = 10, fontface = "bold"))
+
+blank <- rectGrob(gp = gpar(col = "white"))
+
+counttab <- 
+    arrangeGrob(countlab, count_f2, blank, count_m2, blank, nrow=1, widths = c(0.15,0.3,0.18,0.3,0.17))
+
+```
+
+Second, I combine two stacked bar charts. I add empty space (rect grob) first to make it align better with the table created in the previous step
+
+```{r}
+plots_fm <-
+    arrangeGrob(blank, plot_f, plot_m, ncol=3, widths = c(0.12, 0.44, 0.44))
+```
+
+Third, I create text grobs for the main figure title and a note on the bottom
+
+```{r}
+title <- textGrob("Weightclass Composition* at USAPL Raw Nationals by Year, Open Division", 
+                 gp = gpar(col = "grey40", fontsize = 15, fontface = "bold"))
+
+note <- textGrob("* Weightclasses with less than 2% of lifters do not have value labels for aesthetics reasons", 
+                 gp = gpar(col = "grey40", fontsize = 8, fontface = "italic"))
+```
+
+Finally! Piecing it all together!
+
+```{r wclasscomp}
+grid.newpage()
+grid.arrange(arrangeGrob(title, plots_fm, counttab, note, nrow=4, heights = c(0.1, 1, 0.1, 0.05)))
+
+```
+
+And saving a png file just in case.
+
+```{r}
+png(file = "./Charts/Weightclasses distribution Open.png", width=600, height=400)
+grid.arrange(arrangeGrob(title, plots_fm, counttab, note, nrow=4, heights = c(0.1, 1, 0.1, 0.05)))
+dev.off()
+```
+
