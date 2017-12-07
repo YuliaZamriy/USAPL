@@ -4,11 +4,29 @@ author: "Yulia Zamriy"
 date: "December 6, 2017"
 output: 
   html_document: 
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 9
     keep_md: yes
 ---
 
 
 
+## Overview
+
+The main goal of this document is to outline all the steps for creating a figure that:
+
+- Contains weight class composition (%) at USAPL Raw Nationals by Year
+
+- Splits Male vs. Female classes
+
+- Has a table with total lifters each year by gender
+
+Please note, that this is part of a bigger analysis. Hence, not all the background information is provided. For more details see [here](https://github.com/YuliaZamriy/USAPL)
+
+### Requirements
+
+The following packages need to be installed:
 
 
 ```r
@@ -18,10 +36,108 @@ library(gridExtra)
 library(grid)
 ```
 
+The below .csv file is available for download [here](https://github.com/YuliaZamriy/USAPL/tree/master/Nationals/CSV)
+
 
 ```r
 WclassData <- read_csv("./CSV/Raw2014_2016_Weightclass.csv")
 ```
+
+### Data description
+
+This dataset contains a subset of the USAPL Raw Nationals results for 2014-2017:
+
+- Open Divisions only
+
+- First column is row counter to hide lifter names. It will be ignored in this report
+
+- Sex (Factor) Data analysis will be split by gender
+
+- Year (Integer) Year of the competition
+
+- Weightclass (Character) Weight classes. "-" indicates under specified weight. "+" specified weight and above
+
+- Weightclass_Num (Integer) Weight classes transformed into numbers. Two "+" classes (84+, 120+) are coded as 85 and 121
+
+
+```r
+str(WclassData)
+```
+
+```
+## Classes 'tbl_df', 'tbl' and 'data.frame':	1717 obs. of  5 variables:
+##  $ X1             : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ Sex            : chr  "Female" "Female" "Female" "Female" ...
+##  $ Year           : int  2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 ...
+##  $ Weightclass    : chr  "-57" "-72" "-72" "-43" ...
+##  $ Weightclass_Num: int  57 72 72 43 57 63 72 84 47 52 ...
+##  - attr(*, "spec")=List of 2
+##   ..$ cols   :List of 5
+##   .. ..$ X1             : list()
+##   .. .. ..- attr(*, "class")= chr  "collector_integer" "collector"
+##   .. ..$ Sex            : list()
+##   .. .. ..- attr(*, "class")= chr  "collector_character" "collector"
+##   .. ..$ Year           : list()
+##   .. .. ..- attr(*, "class")= chr  "collector_integer" "collector"
+##   .. ..$ Weightclass    : list()
+##   .. .. ..- attr(*, "class")= chr  "collector_character" "collector"
+##   .. ..$ Weightclass_Num: list()
+##   .. .. ..- attr(*, "class")= chr  "collector_integer" "collector"
+##   ..$ default: list()
+##   .. ..- attr(*, "class")= chr  "collector_guess" "collector"
+##   ..- attr(*, "class")= chr "col_spec"
+```
+
+```r
+table(WclassData$Sex)
+```
+
+```
+## 
+## Female   Male 
+##    725    992
+```
+
+```r
+table(WclassData$Year)
+```
+
+```
+## 
+## 2014 2015 2016 2017 
+##  216  506  450  545
+```
+
+```r
+table(WclassData$Weightclass, WclassData$Weightclass_Num)
+```
+
+```
+##       
+##         43  47  52  57  59  63  66  72  74  83  84  85  93 105 120 121
+##   -105   0   0   0   0   0   0   0   0   0   0   0   0   0 191   0   0
+##   -120   0   0   0   0   0   0   0   0   0   0   0   0   0   0  95   0
+##   -43    1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+##   -47    0  28   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+##   -52    0   0  54   0   0   0   0   0   0   0   0   0   0   0   0   0
+##   -57    0   0   0 112   0   0   0   0   0   0   0   0   0   0   0   0
+##   -59    0   0   0   0  28   0   0   0   0   0   0   0   0   0   0   0
+##   -63    0   0   0   0   0 181   0   0   0   0   0   0   0   0   0   0
+##   -66    0   0   0   0   0   0  67   0   0   0   0   0   0   0   0   0
+##   -72    0   0   0   0   0   0   0 168   0   0   0   0   0   0   0   0
+##   -74    0   0   0   0   0   0   0   0 121   0   0   0   0   0   0   0
+##   -83    0   0   0   0   0   0   0   0   0 193   0   0   0   0   0   0
+##   -84    0   0   0   0   0   0   0   0   0   0  98   0   0   0   0   0
+##   -93    0   0   0   0   0   0   0   0   0   0   0   0 240   0   0   0
+##   120+   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0  57
+##   84+    0   0   0   0   0   0   0   0   0   0   0  83   0   0   0   0
+```
+
+### Data transformation
+
+First, I need to do some basic transformation to make the data more suitable for this analysis
+
+Weightclass_Num is converted into a factor variable to make labels on the charts appear in the correct order and with correct weight class names
 
 
 ```r
@@ -35,6 +151,13 @@ WclassData <- mutate(WclassData,
                                              labels = c(Female, Male)))
 ```
 
+### Data aggregation
+
+To create plots with labels let's:
+
+- Aggregate data by Year and Weight Class, separately for Male vs. Female
+
+- Manually create variables containing labels as % and label positions (relative to the y axis on the chart)
 
 
 ```r
@@ -61,7 +184,9 @@ wc_split_m <-
                                100 - cumsum(perc) + 3)))
 ```
 
+### Building pieces of the figure
 
+Since I am building two identical charts (Female vs. Male), it is convenient to create a custom theme variable first
 
 
 ```r
@@ -77,7 +202,7 @@ theme_classic_adj <-
           plot.title = element_text(hjust = 0.03, face = "bold.italic", color = "grey60"))
 ```
 
-
+Then I am building stacked bar charts (each column adds to 100%) and manually created labels at the desired positions
 
 
 ```r
@@ -100,6 +225,7 @@ plot_m <- ggplot(wc_split_m, aes(x = Year, y = perc, fill = Weightclass_Num)) +
     theme_classic_adj 
 ```
 
+I want to add a table under the charts with total lifter count each year. For that I need to further summarize the data and transpose it, so it appears as a row
 
 
 ```r
@@ -116,6 +242,8 @@ count_m1 <- wc_split_m %>%
     data.frame()
 ```
 
+Then I convert these two small datasets into "table grobs" using common theme
+
 
 ```r
 tt <- ttheme_minimal(core=list(fg_params=list(fontface=2, col="white", fontsize = 10),
@@ -128,6 +256,19 @@ count_m2 <- tableGrob(count_m1[2,], cols = NULL, rows = NULL, theme = tt)
 count_m2$widths <- unit(rep(1/ncol(count_m2), ncol(count_m2)), "npc")
 ```
 
+### Assembling pieces into the figure
+
+First, I'll combine two created table grobs the following way:
+
+- Text label (Number of Lifters) that is created as "text grob"
+
+- First table grob
+
+- Blank space "rect grob"
+
+- Second table grob
+
+- Space allocated to each is arbitrary
 
 
 ```r
@@ -140,12 +281,15 @@ counttab <-
     arrangeGrob(countlab, count_f2, blank, count_m2, blank, nrow=1, widths = c(0.15,0.3,0.18,0.3,0.17))
 ```
 
+Second, I combine two stacked bar charts. I add empty space (rect grob) first to make it align better with the table created in the previous step
 
 
 ```r
 plots_fm <-
     arrangeGrob(blank, plot_f, plot_m, ncol=3, widths = c(0.12, 0.44, 0.44))
 ```
+
+Third, I create text grobs for the main figure title and a note on the bottom
 
 
 ```r
@@ -156,6 +300,7 @@ note <- textGrob("* Weightclasses with less than 2% of lifters do not have value
                  gp = gpar(col = "grey40", fontsize = 8, fontface = "italic"))
 ```
 
+Finally! Piecing it all together!
 
 
 ```r
@@ -163,12 +308,13 @@ grid.newpage()
 grid.arrange(arrangeGrob(title, plots_fm, counttab, note, nrow=4, heights = c(0.1, 1, 0.1, 0.05)))
 ```
 
-![](USAPLWclass_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](USAPLWclass_files/figure-html/wclasscomp-1.png)<!-- -->
 
+And saving a png file just in case.
 
 
 ```r
-png(file = "./Charts/Weightclasses distribution Open2.png", width=600, height=400)
+png(file = "./Charts/Weightclasses distribution Open.png", width=600, height=400)
 grid.arrange(arrangeGrob(title, plots_fm, counttab, note, nrow=4, heights = c(0.1, 1, 0.1, 0.05)))
 dev.off()
 ```

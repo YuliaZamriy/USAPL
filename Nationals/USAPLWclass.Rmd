@@ -37,7 +37,7 @@ library(gridExtra)
 library(grid)
 ```
 
-The below .csv file is available for download here.
+The below .csv file is available for download [here](https://github.com/YuliaZamriy/USAPL/tree/master/Nationals/CSV)
 
 ```{r}
 WclassData <- read_csv("./CSV/Raw2014_2016_Weightclass.csv")
@@ -68,7 +68,7 @@ table(WclassData$Weightclass, WclassData$Weightclass_Num)
 
 ### Data transformation
 
-First, we need to do some basic transformation to make the data more suitable for this analysis
+First, I need to do some basic transformation to make the data more suitable for this analysis
 
 Weightclass_Num is converted into a factor variable to make labels on the charts appear in the correct order and with correct weight class names
 
@@ -86,7 +86,7 @@ WclassData <- mutate(WclassData,
 
 ### Data aggregation
 
-To create plots with labels we need:
+To create plots with labels let's:
 
 - Aggregate data by Year and Weight Class, separately for Male vs. Female
 
