@@ -408,6 +408,12 @@ Raw2014_2016 <-
 table(Raw2014_2016$meet_count)
 ```
 
+**Step 12.** Write the final processed file to .csv
+
+```{r}
+write.csv(Raw2014_2016,"Raw2014_2016_processed.csv", row.names = FALSE)
+```
+
 
 
 
